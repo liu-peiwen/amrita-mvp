@@ -32,3 +32,10 @@ This box has been based from [pet-shop-box](https://github.com/truffle-box/pet-s
     // Serves the front-end on http://localhost:3000
     npm run dev
     ```
+
+
+
+Resources:
+https://hackernoon.com/heres-how-i-built-a-private-blockchain-network-and-you-can-too-62ca7db556c0
+
+https://tokenmarket.net/blog/creating-ethereum-smart-contract-transactions-in-client-side-javascript/
