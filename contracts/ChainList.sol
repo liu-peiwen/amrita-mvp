@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 contract ChainList {
-  // custom types
+  // Healthcare Data struct
   struct HealthData {
     uint id;
     address seller;
@@ -12,9 +12,12 @@ contract ChainList {
     string ipfsAddress;
   }
 
-  // state variables
+  // list of data for sale
   mapping (uint => HealthData) public dataList;
   uint dataCounter;
+
+  mapping (uint => HealthData) public myDataList;
+  uint myDataCounter;
 
   // events
   event LogSellData(
@@ -30,8 +33,22 @@ contract ChainList {
     string _name,
     uint256 _price
   );
+  function uploadData(string _name, string _description, string _ipfsAddress) public {
+   myDataCounter++;
 
-  // sell an data
+   myDataList[myDataCounter] = HealthData(
+     myDataCounter,
+     msg.sender,
+     0x0,
+     _name,
+     _description,
+     0x0,
+     _ipfsAddress
+   );
+
+  }
+
+  // sell a data
   function sellData(string _name, string _description, uint256 _price,string _ipfsAddress) public {
     // a new data
     dataCounter++;
