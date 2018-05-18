@@ -24,14 +24,16 @@ contract ChainList {
     uint indexed _id,
     address indexed _seller,
     string _name,
-    uint256 _price
+    uint256 _price,
+    string _ipfsAddress
   );
   event LogBuyData(
     uint indexed _id,
     address indexed _seller,
     address indexed _buyer,
     string _name,
-    uint256 _price
+    uint256 _price,
+    string _ipfsAddress
   );
   function uploadData(string _name, string _description, string _ipfsAddress) public {
    myDataCounter++;
@@ -64,7 +66,7 @@ contract ChainList {
       _ipfsAddress
     );
 
-    LogSellData(dataCounter, msg.sender, _name, _price);
+    LogSellData(dataCounter, msg.sender, _name, _price, _ipfsAddress);
   }
 
   // fetch the number of data in the contract
@@ -122,6 +124,6 @@ contract ChainList {
     data.seller.transfer(msg.value);
 
     // trigger the event
-    LogBuyData(_id, data.seller, data.buyer, data.name, data.price);
+    LogBuyData(_id, data.seller, data.buyer, data.name, data.price, data.ipfsAddress);
   }
 }
