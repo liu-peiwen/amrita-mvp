@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 contract ChainList {
-  // custom types
+  // Healthcare Data struct
   struct HealthData {
     uint id;
     address seller;
@@ -10,44 +10,95 @@ contract ChainList {
     string description;
     uint256 price;
     string ipfsAddress;
+    bool isForSale;
   }
 
-  // state variables
+  // list of data for sale
   mapping (uint => HealthData) public dataList;
   uint dataCounter;
+
+  mapping (uint => HealthData) public myDataList;
+  uint myDataCounter;
 
   // events
   event LogSellData(
     uint indexed _id,
     address indexed _seller,
     string _name,
-    uint256 _price
+    uint256 _price,
+    string _ipfsAddress
   );
   event LogBuyData(
     uint indexed _id,
     address indexed _seller,
     address indexed _buyer,
     string _name,
-    uint256 _price
-  );
+    uint256 _price,
+    string _ipfsAddress
+  ); 
 
-  // sell an data
+  // store ipfsAddress with data name and description into ipfs
+  function uploadData(string _name, string _description, string _ipfsAddress) public {
+   myDataCounter++;
+
+   myDataList[myDataCounter] = HealthData(
+     myDataCounter,
+     msg.sender,
+     0x0,
+     _name,
+     _description,
+     0x0,
+     _ipfsAddress,
+     false
+   );
+
+  }
+
+  function getNumberofMyData() public view returns (uint) {
+    return myDataCounter;
+  }
+
+  // fetch all of current user's data for sale 
+  function getAllMyData() public returns (uint[]) {
+    // prepare output array
+    uint[] memory myDataIds = new uint[](myDataCounter);
+
+    uint numberOfMyData = 0;
+    // iterate over data
+    for(uint i = 1; i <= myDataCounter;  i++) {
+      // keep the id if the seller is the current user
+      if(dataList[i].seller == msg.sender) {
+        myDataIds[numberOfMyData] = myDataList[i].id;
+        numberOfMyData++;
+      }
+    }
+
+    // copy the data Ids array into a smaller allMyData array
+    uint[] memory allMyData = new uint[](numberOfMyData);
+    for(uint j = 0; j < numberOfMyData; j++) {
+      allMyData[j] = myDataIds[j];
+    }
+    return allMyData;
+  }
+
+  // sell a data
   function sellData(string _name, string _description, uint256 _price,string _ipfsAddress) public {
     // a new data
     dataCounter++;
 
     // store this data
     dataList[dataCounter] = HealthData(
-      dataCounter,
-      msg.sender,
-      0x0,
-      _name,
+      dataCounter, //id
+      msg.sender, //seller
+      0x0, //buyer
+      _name, //data name
       _description,
       _price,
-      _ipfsAddress
+      _ipfsAddress,
+      true
     );
 
-    LogSellData(dataCounter, msg.sender, _name, _price);
+    LogSellData(dataCounter, msg.sender, _name, _price, _ipfsAddress);
   }
 
   // fetch the number of data in the contract
@@ -105,6 +156,6 @@ contract ChainList {
     data.seller.transfer(msg.value);
 
     // trigger the event
-    LogBuyData(_id, data.seller, data.buyer, data.name, data.price);
+    LogBuyData(_id, data.seller, data.buyer, data.name, data.price, data.ipfsAddress);
   }
 }
