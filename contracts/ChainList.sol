@@ -10,6 +10,7 @@ contract ChainList {
     string description;
     uint256 price;
     string ipfsAddress;
+    bool isForSale;
   }
 
   // list of data for sale
@@ -34,7 +35,9 @@ contract ChainList {
     string _name,
     uint256 _price,
     string _ipfsAddress
-  );
+  ); 
+
+  // store ipfsAddress with data name and description into ipfs
   function uploadData(string _name, string _description, string _ipfsAddress) public {
    myDataCounter++;
 
@@ -45,9 +48,37 @@ contract ChainList {
      _name,
      _description,
      0x0,
-     _ipfsAddress
+     _ipfsAddress,
+     false
    );
 
+  }
+
+  function getNumberofMyData() public view returns (uint) {
+    return myDataCounter;
+  }
+
+  // fetch all of current user's data for sale 
+  function getAllMyData() public returns (uint[]) {
+    // prepare output array
+    uint[] memory myDataIds = new uint[](myDataCounter);
+
+    uint numberOfMyData = 0;
+    // iterate over data
+    for(uint i = 1; i <= myDataCounter;  i++) {
+      // keep the id if the seller is the current user
+      if(dataList[i].seller == msg.sender) {
+        myDataIds[numberOfMyData] = myDataList[i].id;
+        numberOfMyData++;
+      }
+    }
+
+    // copy the data Ids array into a smaller allMyData array
+    uint[] memory allMyData = new uint[](numberOfMyData);
+    for(uint j = 0; j < numberOfMyData; j++) {
+      allMyData[j] = myDataIds[j];
+    }
+    return allMyData;
   }
 
   // sell a data
@@ -57,13 +88,14 @@ contract ChainList {
 
     // store this data
     dataList[dataCounter] = HealthData(
-      dataCounter,
-      msg.sender,
-      0x0,
-      _name,
+      dataCounter, //id
+      msg.sender, //seller
+      0x0, //buyer
+      _name, //data name
       _description,
       _price,
-      _ipfsAddress
+      _ipfsAddress,
+      true
     );
 
     LogSellData(dataCounter, msg.sender, _name, _price, _ipfsAddress);
