@@ -14,6 +14,8 @@ class App extends Component {
       ipfsHash:null,
       buffer:'',
       ethAddress:'',
+      name: '',
+      dexcription: '',
       blockNumber:'',
       transactionHash:'',
       gasUsed:'',
@@ -78,7 +80,7 @@ class App extends Component {
 
       //save document to IPFS,return its hash#, and set hash# to state
       //https://github.com/ipfs/interface-ipfs-core/blob/master/SPEC/FILES.md#add 
-      await ipfs.add(this.state.buffer, (err, ipfsHash) => {
+      await ipfs.add(this.state.buffer, (err, ipfsHash, name, description) => {
         console.log(err,ipfsHash);
         //setState by setting ipfsHash to ipfsHash[0].hash 
         this.setState({ ipfsHash:ipfsHash[0].hash });
