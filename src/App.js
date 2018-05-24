@@ -161,24 +161,24 @@ class App extends Component {
          </Modal.Header>
          <Modal.Body>
             <Form onSubmit={this.onSubmit}>
-              <div class="form-group">
-               <label for="article_name">Data name</label>
-               <input type="text" class="form-control" id="article_name" placeholder="Enter the name of your article" />
+              <div className={'form-group'}>
+               <label>Data name</label>
+               <input type="text" className={'form-control'} id="article_name" placeholder="Enter the name of your article" />
               </div>
               {/* <div class="form-group">
                 <label for="price">Price in ETH</label>
                 <input type="number" class="form-control" id="article_price" placeholder="1" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" />
               </div> */}
-              <div class="form-group">
-                <label for="description">Description</label>
-                <textarea type="text" class="form-control vresize" id="article_description" placeholder="Describe your article" maxlength="255"></textarea>
+              <div className={'form-group'}>
+                <label>Description</label>
+                <textarea type="text" className={'form-control vresize'} id="article_description" placeholder="Describe your article" maxLength="255"></textarea>
               </div>
-              <input type = 'file' accept='.dcm nii.gz nii' onChange = {this.captureFile}/>
+              <input type = 'file' onChange = {this.captureFile}/>
             </Form>
          </Modal.Body>
          <Modal.Footer>
-              <button class={'btn btn-primary'} type='submit' onCick={this.onSubmit}>Submit</button>
-              <button class={'btn btn-default'} onClick={this.handleClose}>Close</button>
+              <button className={'btn btn-primary'} type='submit' onClick={this.onSubmit}>Submit</button>
+              <button className={'btn btn-default'} onClick={this.handleClose}>Close</button>
          </Modal.Footer>
        </Modal>
       </div>
