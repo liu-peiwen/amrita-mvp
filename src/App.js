@@ -1,4 +1,4 @@
-import {Table, Grid, Button, Form } from 'react-bootstrap';
+import {Table, Grid, Button, Form, Modal} from 'react-bootstrap';
 import React, { Component } from 'react';
 //import logo from './logo.svg';
 import './App.css';
@@ -7,17 +7,22 @@ import ipfs from './ipfs';
 import storehash from './storehash';
 
 class App extends Component {
- 
-    state = {
+
+  constructor(props) {
+    super(props);
+    this.state = {
       ipfsHash:null,
       buffer:'',
       ethAddress:'',
       blockNumber:'',
       transactionHash:'',
       gasUsed:'',
-      txReceipt: ''   
+      txReceipt: '',
+      show: false   
     };
-   
+    //this.handleClose = this.handleClose.bind(this);
+  }
+
     captureFile =(event) => {
         event.stopPropagation()
         event.preventDefault()
@@ -33,6 +38,10 @@ class App extends Component {
       //set this buffer -using es6 syntax
         this.setState({buffer});
     };
+
+    handleOpen = () => this.setState({show: true});
+
+    handleClose = () => this.setState({show: false});
 
     onClick = async () => {
 
@@ -99,17 +108,11 @@ class App extends Component {
 
         <Grid>
           <h3> Choose file to send to IPFS </h3>
-          <Form onSubmit={this.onSubmit}>
-            <input 
-              type = "file"
-              onChange = {this.captureFile}
-            />
-             <Button 
-             bsStyle="primary" 
-             type="submit"> 
-             Send it 
+          <div>
+             <Button bsStyle="primary" type="submit" onClick={this.handleOpen}> 
+             Sell My Data
              </Button>
-          </Form>
+          </div>
 
           <hr/>
             <Button onClick = {this.onClick}> Get Transaction Receipt </Button>
@@ -149,9 +152,36 @@ class App extends Component {
                 </tbody>
             </Table>
         </Grid>
-     </div>
-      );
-    } //render
+
+       <Modal show={this.state.show} onHide={this.handleClose}>
+         <Modal.Header closeButton>
+           <Modal.Title>Sell Your Data</Modal.Title>
+         </Modal.Header>
+         <Modal.Body>
+            <Form onSubmit={this.onSubmit}>
+              <div class="form-group">
+               <label for="article_name">Data name</label>
+               <input type="text" class="form-control" id="article_name" placeholder="Enter the name of your article" />
+              </div>
+              {/* <div class="form-group">
+                <label for="price">Price in ETH</label>
+                <input type="number" class="form-control" id="article_price" placeholder="1" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" />
+              </div> */}
+              <div class="form-group">
+                <label for="description">Description</label>
+                <textarea type="text" class="form-control vresize" id="article_description" placeholder="Describe your article" maxlength="255"></textarea>
+              </div>
+              <input type = 'file' accept='.dcm nii.gz nii' onChange = {this.captureFile}/>
+            </Form>
+         </Modal.Body>
+         <Modal.Footer>
+              <button class={'btn btn-primary'} type='submit' onCick={this.onSubmit}>Submit</button>
+              <button class={'btn btn-default'} onClick={this.handleClose}>Close</button>
+         </Modal.Footer>
+       </Modal>
+      </div>
+    );
+  } //render
 }
 
 export default App;
