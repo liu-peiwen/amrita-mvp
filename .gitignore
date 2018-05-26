@@ -12,3 +12,4 @@ package-lock.json
 logs
 *.log
 npm-debug.log*
+package-lock.json
