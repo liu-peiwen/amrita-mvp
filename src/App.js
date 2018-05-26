@@ -112,7 +112,7 @@ class App extends Component {
           <h3> Choose file to send to IPFS </h3>
           <div>
              <Button bsStyle="primary" type="submit" onClick={this.handleOpen}> 
-             Sell My Data
+             Upload Data
              </Button>
           </div>
 
@@ -163,7 +163,7 @@ class App extends Component {
             <Form onSubmit={this.onSubmit}>
               <div className={'form-group'}>
                <label>Data name</label>
-               <input type="text" className={'form-control'} id="article_name" placeholder="Enter the name of your article" />
+               <input type="text" className={'form-control'} id="article_name" placeholder="Enter the name of your data" />
               </div>
               {/* <div class="form-group">
                 <label for="price">Price in ETH</label>
@@ -171,7 +171,7 @@ class App extends Component {
               </div> */}
               <div className={'form-group'}>
                 <label>Description</label>
-                <textarea type="text" className={'form-control vresize'} id="article_description" placeholder="Describe your article" maxLength="255"></textarea>
+                <textarea type="text" className={'form-control vresize'} id="article_description" placeholder="Describe your data" maxLength="255"></textarea>
               </div>
               <input type = 'file' onChange = {this.captureFile}/>
             </Form>
