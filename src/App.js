@@ -112,7 +112,7 @@ class App extends Component {
           <h3> Choose file to send to IPFS </h3>
           <div>
              <Button bsStyle="primary" type="submit" onClick={this.handleOpen}> 
-             Sell My Data
+             Upload Data
              </Button>
           </div>
 
