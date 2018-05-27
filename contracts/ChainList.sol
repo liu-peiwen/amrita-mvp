@@ -34,7 +34,7 @@ contract ChainList {
     string _name,
     uint256 _price,
     string _ipfsAddress
-  ); 
+  );
 
   // store ipfsAddress with data name and description into ipfs
   function uploadData(string _name, string _description, string _ipfsAddress) public {
@@ -62,14 +62,14 @@ contract ChainList {
      false));
   }
 
-  // fetch all of current user's data for sale 
+  // fetch all of current user's data for sale
   function getAllMyData(address currentUser) public returns (HealthData[]) {
     return dataListByAccount[currentUser];
   }
 
   // sell a data
   function sellData(uint _id, address currentUser, uint256 _price) public {
-    // add price of the data and change isForSale flag of the data to true 
+    // add price of the data and change isForSale flag of the data to true
     dataList[_id].price = _price;
     dataList[_id].isForSale = true;
 
