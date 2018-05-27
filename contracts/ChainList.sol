@@ -17,8 +17,7 @@ contract ChainList {
   mapping (uint => HealthData) public dataList;
   uint dataCounter;
 
-  mapping (uint => HealthData) public myDataList;
-  uint myDataCounter;
+  mapping(address => HealthData[]) public dataListByAccount;
 
   // events
   event LogSellData(
@@ -39,10 +38,10 @@ contract ChainList {
 
   // store ipfsAddress with data name and description into ipfs
   function uploadData(string _name, string _description, string _ipfsAddress) public {
-   myDataCounter++;
+   dataCounter++;
 
-   myDataList[myDataCounter] = HealthData(
-     myDataCounter,
+   dataList[dataCounter] = HealthData(
+     dataCounter,
      msg.sender,
      0x0,
      _name,
@@ -52,53 +51,25 @@ contract ChainList {
      false
    );
 
-  }
-
-  function getNumberofMyData() public view returns (uint) {
-    return myDataCounter;
+   dataListByAccount[msg.sender].push(HealthData(
+     dataCounter,
+     msg.sender,
+     0x0,
+     _name,
+     _description,
+     0x0,
+     _ipfsAddress,
+     false));
   }
 
   // fetch all of current user's data for sale 
-  function getAllMyData() public returns (uint[]) {
-    // prepare output array
-    uint[] memory myDataIds = new uint[](myDataCounter);
-
-    uint numberOfMyData = 0;
-    // iterate over data
-    for(uint i = 1; i <= myDataCounter;  i++) {
-      // keep the id if the seller is the current user
-      if(dataList[i].seller == msg.sender) {
-        myDataIds[numberOfMyData] = myDataList[i].id;
-        numberOfMyData++;
-      }
-    }
-
-    // copy the data Ids array into a smaller allMyData array
-    uint[] memory allMyData = new uint[](numberOfMyData);
-    for(uint j = 0; j < numberOfMyData; j++) {
-      allMyData[j] = myDataIds[j];
-    }
-    return allMyData;
+  function getAllMyData(address currentUser) public returns (HealthData[]) {
+    return dataListByAccount[currentUser];
   }
 
   // sell a data
   function sellData(string _name, string _description, uint256 _price,string _ipfsAddress) public {
-    // a new data
-    dataCounter++;
-
-    // store this data
-    dataList[dataCounter] = HealthData(
-      dataCounter, //id
-      msg.sender, //seller
-      0x0, //buyer
-      _name, //data name
-      _description,
-      _price,
-      _ipfsAddress,
-      true
-    );
-
-    LogSellData(dataCounter, msg.sender, _name, _price, _ipfsAddress);
+    
   }
 
   // fetch the number of data in the contract
