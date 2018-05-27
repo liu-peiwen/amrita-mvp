@@ -115,10 +115,8 @@ contract ChainList {
     // iterate over data
     for(uint i = 1; i <= dataCounter;  i++) {
       // keep the ID if the data is still for sale
-      if(dataList[i].buyer == 0x0) {
-        dataIds[numberOfDataForSale] = dataList[i].id;
-        numberOfDataForSale++;
-      }
+      dataIds[numberOfDataForSale] = dataList[i].id;
+      numberOfDataForSale++;
     }
 
     // copy the data Ids array into a smaller forSale array
