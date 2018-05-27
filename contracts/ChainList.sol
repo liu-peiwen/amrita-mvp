@@ -60,6 +60,7 @@ contract ChainList {
      0x0,
      _ipfsAddress,
      false));
+<<<<<<< HEAD
   }
 
   // fetch all of current user's data for sale 
@@ -81,6 +82,18 @@ contract ChainList {
         HealthDataListByCurrentUser[i].price= _price;
       }
     }
+=======
+  }
+
+  // fetch all of current user's data for sale 
+  function getAllMyData(address currentUser) public returns (HealthData[]) {
+    return dataListByAccount[currentUser];
+  }
+
+  // sell a data
+  function sellData(string _name, string _description, uint256 _price,string _ipfsAddress) public {
+    
+>>>>>>> 5544c9f758c0cda77c9e1623f4c63291a86c1522
   }
 
   // fetch the number of data in the contract
