@@ -34,6 +34,18 @@ input[type="file"] {
 .table th {
     text-align: center;
 }
+
+.market-data {
+  display: block;
+}
+
+.market-data-list {
+  display: flex;
+  border: solid 1px grey;
+}
+.market-data-list-item {
+
+}
 /*end of my css*/
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
