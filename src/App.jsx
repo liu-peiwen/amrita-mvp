@@ -226,7 +226,7 @@ class App extends Component {
             <div>{this.state.balance}</div>
             <div>{this.state.DataList}</div>
              <Button bsStyle="primary" type="submit" onClick={this.handleOpen}> 
-             Sell My Data
+             Upload Data
              </Button>
              <div className='market-data'>{this.DataForSale(this.state.dataForSale)}</div>
              <div className='my-data'>{this.AllMyData(this.state.AllMyData)}</div>
@@ -279,7 +279,11 @@ class App extends Component {
             <Form onSubmit={this.onSubmit}>
               <div className= 'form-group'>
                <label>Data name</label>
+<<<<<<< HEAD:src/App.jsx
                <input type="text" className= 'form-control' id="article_name" placeholder="Enter the name of your article" />
+=======
+               <input type="text" className={'form-control'} id="article_name" placeholder="Enter the name of your data" />
+>>>>>>> master:src/App.js
               </div>
               {/* <div class="form-group">
                 <label for="price">Price in ETH</label>
@@ -287,7 +291,7 @@ class App extends Component {
               </div> */}
               <div className= 'form-group'>
                 <label>Description</label>
-                <textarea type="text" className={'form-control vresize'} id="article_description" placeholder="Describe your article" maxLength="255"></textarea>
+                <textarea type="text" className={'form-control vresize'} id="article_description" placeholder="Describe your data" maxLength="255"></textarea>
               </div>
               <input type = 'file' onChange = {this.captureFile}/>
             </Form>
