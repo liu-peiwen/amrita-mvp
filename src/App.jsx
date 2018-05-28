@@ -17,8 +17,8 @@ class App extends Component {
       ipfsHash:null,
       buffer:'',
       ethAddress:'',
-      name: '',
-      dexcription: '',
+      Name: '',
+      Description: '',
       blockNumber:'',
       transactionHash:'',
       gasUsed:'',
@@ -28,7 +28,14 @@ class App extends Component {
       web3Provider: null,
       ContractInstance: '',
       DataList:[],
+
       IsForSale: false,
+      PutItOnMarket: false,
+      NameForSale: '',
+      DescriptionForSale: '',
+      IndexForSale: null,
+      IdForSale: '',
+      PriceForSell: null,
 
       dataForSale: [
         {Id: '1', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH'},
@@ -37,8 +44,8 @@ class App extends Component {
         {Id: '4', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH'},
         {Id: '5', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH'}
       ],
-
-      //DataForSale: [],
+      
+      DataForSale: [],
       AllMyData: [],
       show: false
     };
@@ -55,44 +62,66 @@ class App extends Component {
       web3.eth.getBalance(account, (err, balance) =>{
         this.setState({balance: web3.utils.fromWei(balance, "ether") + " ETH"});
       })
-      // Instantiate Contract
+      //Instantiate Contract
       this.contract.deployed().then((contractInstance) => {
+
       this.setState({ContractInstance: contractInstance});
       console.log(contractInstance.getDataForSale());
-
+    
+      //Display all market data
       contractInstance.getDataForSale().then((dataIdList) => {
-        console.log(dataIdList);
+        console.log('All Market Data ID List --',dataIdList);
+        
         for(let i = 0; i < dataIdList.length; i++) {
           var dataId = dataIdList[i];
-          contractInstance.dataList(dataId.toNumber()).then(function(article){
-            console.log(article[0], article[1], article[3], article[4], article[5]);
-
-            const dataForSale = [...this.state.DataForSale];
-            dataForSale.push( {
-              Id: article[0],
-              Seller: article[1],
-              Buyer: article[2],
-              Name: article[3],
-              Description: article[4],
-              Price: article[5],
-              IsForSale: article[7]
-            })
-
-            if(article[1] === this.state.account) {
-              const allMyData = [...this.state.AllMyData];
-              allMyData.push({
-                Id: article[0],
-                Name: article[3],
-                Description: article[4],
-                Price: article[5],
-                IsForSale: article[7]
-              });
-              this.setState({AllMyData: allMyData})
+          contractInstance.dataList(dataId.toNumber()).then((data) => {
+            if(data[7] === true || data[7] === null) {
+              console.log(data);
+              const dataForSale = [];
+              dataForSale.push( {
+                Id: data[0],
+                Seller: data[1],
+                Buyer: data[2],
+                Name: data[3],
+                Description: data[4],
+                Price: data[5],
+                IsForSale: data[7]
+              })
+              this.setState({DataForSale: [...this.state.DataForSale, dataForSale]});
+              console.log('Data for sale in state --', this.state.DataForSale[0])
             }
-            this.setState({DataForSale: dataForSale});
           });
         }
       })
+
+      //Display ALL My Data
+     contractInstance.getDataForSale().then((dataIdList) => {
+
+      for(let i = 0; i < dataIdList.length; i++) {
+         var dataId = dataIdList[i];
+
+         contractInstance.dataList(dataId.toNumber()).then((data) => {
+
+          if( data[1] === this.state.account) {
+            console.log("My data --", data);
+            const allMyData = [];
+            allMyData.push( {
+              Id: data[0],
+              Seller: data[1],
+              Buyer: data[2],
+              Name: data[3],
+              Description: data[4],
+              Price: data[5],
+              IpfsAddress: data[6],
+              IsForSale: data[7]
+            })
+ 
+            this.setState({AllMyData: [...this.state.AllMyData, allMyData]});
+            console.log('All My Data in state --', this.state.AllMyData);          
+          }
+         });
+       }
+       })
 
       })
     })
@@ -103,36 +132,100 @@ class App extends Component {
       dataforsale.map((data, index) => {
         return(
         <div key={index} className= 'market-data-list'>
-          <div className= 'market-data-list-item'>{data.Id}</div>
-          <div className= 'market-data-list-item'>{data.Seller}</div>
-          <div className= 'market-data-list-item'>{data.Buyer}</div>
-          <div className= 'market-data-list-item'>{data.Name}</div>
-          <div className= 'market-data-list-item'>{data.Description}</div>
-          <div className= 'market-data-list-item'>{data.Price}</div>
+          <div className= 'market-data-list-item'>{data[0].Seller}</div>
+          <div className= 'market-data-list-item'>{data[0].Name}</div>
+          <div className= 'market-data-list-item'>{data[0].Description}</div>
+          <div className= 'market-data-list-item'>{data[0].Price}</div>
+          {/* <button className='btn btn-primary' onClick={(index) => this.sellMyDataModal(index)} disabled={this.state.IsForSale}>Buy</button> */}
         </div>
         )
       })
     )
   }
-
+ 
   AllMyData = (allmydata) => {
     return (
       allmydata.map((data, index) => {
         return(
-        <div key={index} className= 'market-data-list'>
-          <div className= 'market-data-list-item'>{data.Id}</div>
-          <div className= 'market-data-list-item'>{data.Name}</div>
-          <div className= 'market-data-list-item'>{data.Description}</div>
-          <button class='btn btn-primary' onClick={() => this.sellMyData(data)} disabled={this.state.IsForSale}>Sell</button>
+        <div key={index} className= 'my-data-list'>
+          <div className= 'my-data-list-item'>{data[0].IpfsAddress}</div>
+          <div className= 'my-data-list-item'>{data[0].Name}</div>
+          <div className= 'my-data-list-item'>{data[0].Description}</div>
+          <button className='btn btn-primary' onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</button>
         </div>
-        )
+        ) 
       })
     )
   }
 
+  openSellModal = (i) => {
+    this.setState({
+      NameForSale: this.state.AllMyData[i][0].Name,
+      DescriptionForSale: this.state.AllMyData[i][0].Description,
+      IdForSale: this.state.AllMyData[i][0].Id,
+      IndexForSale: i,
+      PutItOnMarket: true})
+  }
+
   sellMyData = async(props) => {
-    await this.contractInstance.sellData();
-    this.setState({IsForSale: true});
+  
+    console.log(web3.utils.toWei(this.state.PriceForSell, "ether"));
+    await this.state.ContractInstance.sellData(this.state.IdForSale, web3.utils.toWei(this.state.PriceForSell, "ether"), { from: this.state.account, gas: 500000});
+    //Display all market data
+    this.state.ContractInstance.getDataForSale().then((dataIdList) => {
+      console.log('All Market Data ID List --',dataIdList);
+      
+      for(let i = 0; i < dataIdList.length; i++) {
+        var dataId = dataIdList[i];
+        this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
+          if(data[7] === true || data[7] === null) {
+            console.log(data);
+            const dataForSale = [];
+            dataForSale.push( {
+              Id: data[0],
+              Seller: data[1],
+              Buyer: data[2],
+              Name: data[3],
+              Description: data[4],
+              Price: data[5],
+              IsForSale: data[7]
+            })
+            this.setState({DataForSale: [...this.state.DataForSale, dataForSale]});
+            console.log('Data for sale in state --', this.state.DataForSale[0])
+          }
+        });
+      }
+    })
+
+    //Display ALL My Data
+   this.state.ContractInstance.getDataForSale().then((dataIdList) => {
+
+    for(let i = 0; i < dataIdList.length; i++) {
+       var dataId = dataIdList[i];
+
+       this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
+
+        if( data[1] === this.state.account) {
+          console.log("My data --", data);
+          const allMyData = [];
+          allMyData.push( {
+            Id: data[0],
+            Seller: data[1],
+            Buyer: data[2],
+            Name: data[3],
+            Description: data[4],
+            Price: data[5],
+            IpfsAddress: data[6],
+            IsForSale: data[7]
+          })
+
+          this.setState({AllMyData: [...this.state.AllMyData, allMyData]});
+          console.log('All My Data in state --', this.state.AllMyData);          
+        }
+       });
+     }
+     })
+
   }
 
     captureFile =(event) => {
@@ -155,6 +248,8 @@ class App extends Component {
 
     handleClose = () => this.setState({show: false});
 
+    handleSellModalClose = () => this.setState({PutItOnMarket: false});
+
     onClick = async () => {
 
     try{
@@ -176,6 +271,17 @@ class App extends Component {
       } //catch
   } //onClick
 
+  handleEventChange = (e) => {
+    if(e.target.id === 'data_name') {
+      this.setState({Name: e.target.value});
+    }
+    if(e.target.id === 'data_description') {
+      this.setState({Description: e.target.value});
+    }
+    if(e.target.id === 'data_price') {
+      this.setState({PriceForSell: e.target.value});
+    }
+  }
 
     onSubmit = async (event) => {
       event.preventDefault();
@@ -195,40 +301,66 @@ class App extends Component {
         console.log(err,ipfsHash);
         //setState by setting ipfsHash to ipfsHash[0].hash
         this.setState({ ipfsHash:ipfsHash[0].hash });
-
-        // call Ethereum contract method "sendHash" and .send IPFS hash to etheruem contract
+  
+        // call Ethereum contract method "sendHash" and .send IPFS hash to etheruem contract 
         //return the transaction hash from the ethereum contract
         //see, this https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send
+        console.log('State',this.state.Name, this.state.Description);
+         
+        // this.contract.deployed().then((contractInstance) => {
+        //   console.log(contractInstance)
+        //   contractInstance.uploadData(this.state.Name,this.state.Description,ipfsHash[0].hash,{
+        //     from: this.state.account,
+        //     gas: 500000
+        //   });
+        // })
 
-        storehash.methods.sendHash(this.state.ipfsHash).send({
-          from: accounts[0]
-        }, (error, transactionHash) => {
-          console.log(transactionHash);
-          this.setState({transactionHash});
-        }); //storehash
-      }) //await ipfs.add
-    }; //onSubmit
+        this.state.ContractInstance.uploadData(
+          this.state.Name, 
+          this.state.Description,
+          ipfsHash[0].hash,
+          {
+          from: this.state.account,
+          gas: 500000
+          });
+        this.setState({
+          show: false,
+          Name: '',
+          Description:''
+        });
 
+        
+        // storehash.methods.sendHash(this.state.ipfsHash).send({
+        //   from: accounts[0]
+        // }, (error, transactionHash) => {
+        //   console.log(transactionHash);
+        //   this.setState({transactionHash});
+        // }); //storehash 
+
+      }) //await ipfs.add 
+    }; //onSubmit 
+  
     render() {
-
+      const isEnabled =
+      this.state.Name.length > 0 &&
+      this.state.Description.length > 0;
+  
       return (
         <div className="App">
           <header className="App-header">
             <h1> Ethereum and InterPlanetary File System(IPFS) with Create React App</h1>
-          </header>
+          </header> 
 
-          <hr />
-
-        <Grid>
+         <Grid>
           <h3> Choose file to send to IPFS </h3>
           <div>
             <div>{this.state.account}</div>
             <div>{this.state.balance}</div>
             <div>{this.state.DataList}</div>
-             <Button bsStyle="primary" type="submit" onClick={this.handleOpen}>
+             <Button bsStyle="primary" type="submit" onClick={this.handleOpen}> 
              Upload Data
              </Button>
-             <div className='market-data'>{this.DataForSale(this.state.dataForSale)}</div>
+             <div className='market-data'>{this.DataForSale(this.state.DataForSale)}</div>
              <div className='my-data'>{this.AllMyData(this.state.AllMyData)}</div>
           </div>
 
@@ -279,7 +411,7 @@ class App extends Component {
             <Form onSubmit={this.onSubmit}>
               <div className= 'form-group'>
                <label>Data name</label>
-               <input type="text" className={'form-control'} id="article_name" placeholder="Enter the name of your data" />
+               <input type="text" className= 'form-control' id="data_name" onChange={this.handleEventChange} placeholder="Enter the name of your article" />
               </div>
               {/* <div class="form-group">
                 <label for="price">Price in ETH</label>
@@ -287,16 +419,44 @@ class App extends Component {
               </div> */}
               <div className= 'form-group'>
                 <label>Description</label>
-                <textarea type="text" className={'form-control vresize'} id="article_description" placeholder="Describe your data" maxLength="255"></textarea>
+                <textarea type="text" className={'form-control vresize'} id="data_description" onChange={this.handleEventChange} placeholder="Describe your article" maxLength="255"></textarea>
               </div>
               <input type = 'file' onChange = {this.captureFile}/>
             </Form>
          </Modal.Body>
          <Modal.Footer>
-              <button className= 'btn btn-primary' type='submit' onClick={this.onSubmit}>Submit</button>
+              <button className= 'btn btn-primary' type='submit' onClick={this.onSubmit} disabled={!isEnabled}>Submit</button>
               <button className= 'btn btn-default' onClick={this.handleClose}>Close</button>
          </Modal.Footer>
        </Modal>
+
+
+      <Modal show={this.state.PutItOnMarket} onHide={this.handleSellModalClose}>
+       <Modal.Header closeButton>
+        <Modal.Title>Put Your Data On The Market</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+         <Form onSubmit={this.sellMyData}>
+           <div className= 'form-group'>
+            <label>Data name</label>
+            <label>{this.state.NameForSale}</label>
+           </div>
+           <div className= 'form-group'>
+             <label>Description</label>
+             <label>{this.state.DescriptionForSale}</label>
+           </div>
+           <div className="form-group">
+             <label>Price in ETH</label>
+             <input type="number" className="form-control" id="data_price" onChange={this.handleEventChange} placeholder="1" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" />
+           </div>
+         </Form>
+      </Modal.Body>
+      <Modal.Footer>
+           <button className= 'btn btn-primary' type='submit' onClick={this.sellMyData}>Submit</button>
+           <button className= 'btn btn-default' onClick={this.handleSellModalClose}>Close</button>
+      </Modal.Footer>
+    </Modal>
+       
       </div>
     );
   } //render
