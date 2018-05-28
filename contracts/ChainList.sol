@@ -63,24 +63,20 @@ contract ChainList {
   }
 
   // fetch all of current user's data for sale
-  function getAllMyData(address currentUser) public returns (HealthData[]) {
-    return dataListByAccount[currentUser];
+  function getAllMyData(address currentUser) public view returns (uint[]) {
+    uint[] currentUserIdList;
+    for(uint i = 1; i <= dataCounter;  i++) {
+      if (dataList[i].seller == currentUser){
+        currentUserIdList.push(i);
+      }
+    }
+    return currentUserIdList;
   }
 
   // sell a data
-  function sellData(uint _id, address currentUser, uint256 _price) public {
-    // add price of the data and change isForSale flag of the data to true
+  function sellData(uint _id, uint256 _price) public {
     dataList[_id].price = _price;
     dataList[_id].isForSale = true;
-
-    HealthData[] HealthDataListByCurrentUser = dataListByAccount[currentUser];
-
-    for (uint i = 0; i < HealthDataListByCurrentUser.length; i++) {
-      if (HealthDataListByCurrentUser[i].id == _id) {
-        HealthDataListByCurrentUser[i].isForSale = true;
-        HealthDataListByCurrentUser[i].price= _price;
-      }
-    }
   }
 
   // fetch the number of data in the contract
