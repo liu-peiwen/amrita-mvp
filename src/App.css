@@ -40,7 +40,6 @@ input[type="file"] {
 }
 
 .market-data-list {
-  display: flex;
   border: solid 1px grey;
 }
 .market-data-list-item {

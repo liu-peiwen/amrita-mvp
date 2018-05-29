@@ -126,7 +126,7 @@ contract ChainList {
   }
 
   // buy data
-  function buyData(uint _id) payable public {
+  function buyData(uint _id) payable public returns(string) {
     // we check whether there is an data for sale
     require(dataCounter > 0);
 
@@ -145,13 +145,11 @@ contract ChainList {
     // we check that the value sent corresponds to the price of the data
     require(msg.value == data.price);
 
-    // keep buyer's information
-    data.buyer = msg.sender;
-
     // the buyer can pay the seller
     data.seller.transfer(msg.value);
 
+    return(data.ipfsAddress);
     // trigger the event
-    LogBuyData(_id, data.seller, data.buyer, data.name, data.price, data.ipfsAddress);
+    //LogBuyData(_id, data.seller, data.buyer, data.name, data.price, data.ipfsAddress);
   }
 }
