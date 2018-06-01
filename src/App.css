@@ -10,9 +10,15 @@
 
 .App-header {
   background-color: #222;
-  height: 150px;
+  height: 50px;
   padding: 20px;
   color: white;
+  display: flex;
+  justify-content: space-between;
+}
+
+.App-header:nth-child(2) {
+  font-size: 20;
 }
 
 .App-title {
@@ -49,4 +55,30 @@ input[type="file"] {
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Create two equal columns that floats next to each other */
+.column1 {
+  float: left;
+  width: 30%;
+  padding: 10px;
+  height: 1000px; /* Should be removed. Only for demonstration */
+}
+
+.column2 {
+  float: left;
+  width: 70%;
+  padding: 10px;
+  height: 1000px; /* Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
 }

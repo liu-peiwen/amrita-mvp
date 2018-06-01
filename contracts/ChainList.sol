@@ -63,13 +63,10 @@ contract ChainList {
      false));
   }
 
-  // fetch all of current user's data for sale 
-  // function getAllMyData(address currentUser) public  view returns (HealthData[]) {
-  //   return dataListByAccount[currentUser];
-  // }
+  uint[] currentUserIdList;
 
-  function getAllMyData(address currentUser) public constant returns (uint[]) {
-    uint[] currentUserIdList;
+
+  function getAllMyData(address currentUser) public constant returns (uint[]) {    
     for(uint i = 1; i <= dataCounter;  i++) {
       if (dataList[i].seller == currentUser){
         currentUserIdList.push(i);
@@ -78,23 +75,8 @@ contract ChainList {
     return currentUserIdList;
   }
 
-  // sell a data
-  // function sellData(uint _id, address currentUser, uint256 _price) public {
-  //   // add price of the data and change isForSale flag of the data to true
-  //   dataList[_id].price = _price;
-  //   dataList[_id].isForSale = true;
-
-  //   HealthData[] HealthDataListByCurrentUser = dataListByAccount[currentUser];
-
-  //   for (uint i = 0; i < HealthDataListByCurrentUser.length; i++) {
-  //     if (HealthDataListByCurrentUser[i].id == _id) {
-  //       HealthDataListByCurrentUser[i].isForSale = true;
-  //       HealthDataListByCurrentUser[i].price= _price;
-  //     }
-  //   }
-  // }
-
   function sellData(uint _id, uint256 _price) public { 
+    require(dataList[_id].isForSale == false);
     dataList[_id].price = _price; 
     dataList[_id].isForSale = true; 
   }
@@ -104,7 +86,7 @@ contract ChainList {
     return dataCounter;
   }
 
-  // fetch and return all data IDs for data still for sale
+  // fetch and return all data IDs for data with isForSale being true
   function getDataForSale() public view returns (uint[]) {
     // prepare output array
     uint[] memory dataIds = new uint[](dataCounter);
@@ -112,9 +94,10 @@ contract ChainList {
     uint numberOfDataForSale = 0;
     // iterate over data
     for(uint i = 1; i <= dataCounter;  i++) {
-      // keep the ID if the data is still for sale
-      dataIds[numberOfDataForSale] = dataList[i].id;
-      numberOfDataForSale++;
+      if(dataList[i].isForSale == true) {
+        dataIds[numberOfDataForSale] = dataList[i].id;
+        numberOfDataForSale++;
+      }
     }
 
     // copy the data Ids array into a smaller forSale array
@@ -125,21 +108,18 @@ contract ChainList {
     return forSale;
   }
 
-  // buy data
   function buyData(uint _id) payable public returns(string) {
-    // we check whether there is an data for sale
+    // we check whether there is data for sale
     require(dataCounter > 0);
 
-    // we check that the data exists
+    // we check that the article exists
     require(_id > 0 && _id <= dataCounter);
 
-    // we retrieve the data
+    // we retrieve the article
     HealthData storage data = dataList[_id];
 
-    // we check that the data has not been sold yet
-    require(data.buyer == 0X0);
+    require(data.isForSale = true);
 
-    // we don't allow the seller to buy his own data
     require(msg.sender != data.seller);
 
     // we check that the value sent corresponds to the price of the data
@@ -147,9 +127,10 @@ contract ChainList {
 
     // the buyer can pay the seller
     data.seller.transfer(msg.value);
-
-    return(data.ipfsAddress);
+    
+    return data.ipfsAddress;
     // trigger the event
     //LogBuyData(_id, data.seller, data.buyer, data.name, data.price, data.ipfsAddress);
   }
 }
+

@@ -3,15 +3,15 @@ import React, { Component } from 'react';
 // import {BigNumber} from 'bignumber.js';
 //import logo from './logo.svg';
 import './App.css';
-//import web3 from './web3';
+import web3 from './web3';
 
 import ipfs from './ipfs';
 //import storehash from './storehash';
 //import TruffleContract from './truffle-contract'
 import chainList from './ChainList.json'
 const TruffleContract = require("truffle-contract");
-const Web3 = require('web3');
-const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+// const Web3 = require('web3');
+// const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 //var BigNumber = require('bignumber.js')
 
 class App extends Component {
@@ -54,7 +54,7 @@ class App extends Component {
       AllMyData: [],
       show: false
     };
-    
+
     this.contract = TruffleContract(chainList);
     this.contract.setProvider(web3.currentProvider);
   }
@@ -65,7 +65,7 @@ class App extends Component {
       //Initial Account and Get Balance
       this.setState({ account });
       web3.eth.getBalance(account, (err, balance) => {
-        this.setState({ balance: web3.fromWei(balance, "ether") + " ETH" });
+        this.setState({ balance: web3.utils.fromWei(balance, "ether") + " ETH" });
       })
       //Instantiate Contract
       this.contract.deployed().then((contractInstance) => {
@@ -89,7 +89,7 @@ class App extends Component {
                   Buyer: data[2],
                   Name: data[3],
                   Description: data[4],
-                  Price: web3.fromWei(data[5].toString(),"ether"),
+                  Price: web3.utils.fromWei(data[5].toString(), "ether"),
                   IsForSale: data[7]
                 })
                 this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
@@ -100,7 +100,8 @@ class App extends Component {
         })
 
         //Display ALL My Data
-        contractInstance.getDataForSale().then((dataIdList) => {
+        console.log(this.state.account);
+        contractInstance.getAllMyData(this.state.account).then((dataIdList) => {
 
           for (let i = 0; i < dataIdList.length; i++) {
             var dataId = dataIdList[i];
@@ -117,7 +118,7 @@ class App extends Component {
                   Buyer: data[2],
                   Name: data[3],
                   Description: data[4],
-                  Price: web3.fromWei(data[5].toString(),"ether"),
+                  Price: web3.utils.fromWei(data[5].toString(), "ether"),
                   IpfsAddress: data[6],
                   IsForSale: data[7]
                 })
@@ -141,7 +142,7 @@ class App extends Component {
             <div className='market-data-list-item'>{data[0].Seller}</div>
             <div className='market-data-list-item'>{data[0].Name}</div>
             <div className='market-data-list-item'>{data[0].Description}</div>
-            <div className='market-data-list-item'>{web3.fromWei(data[0].Price, "ether")}</div>
+            <div className='market-data-list-item'>{web3.utils.fromWei(data[0].Price, "ether")}</div>
             <button className='btn btn-primary' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.account}>Buy</button>
           </div>
         )
@@ -177,24 +178,30 @@ class App extends Component {
   buyMarketData = (index) => {
 
     console.log(this.state.DataForSale[index][0].Id.toNumber());
-    this.state.ContractInstance.buyData(this.state.DataForSale[index][0].Id)
-    // .then(ipfsHash => window.location.replace(`www.ipfs.io/ipfs/${ipfsHash}`))
-    .then(ipfsHash => console.log(ipfsHash))
-    .catch(err => alert(err));
+    this.state.ContractInstance.buyData(
+      this.state.DataForSale[index][0].Id,
+      {
+        from: this.state.account,
+        value: web3.utils.toWei(this.state.DataForSale[index][0].Price)
+      }
+    )
+      .then(ipfsHash => window.location.replace(`www.ipfs.io/ipfs/${ipfsHash}`))
+      .then(ipfsHash => console.log(ipfsHash))
+      .catch(err => alert(err));
 
   }
 
   sellMyData = () => {
 
-    console.log('TYPE OF SELLING PRICE--', web3.toBigNumber(web3.toWei(this.state.PriceForSell.toString(), "ether")));
+    //console.log('TYPE OF SELLING PRICE--', web3.toBigNumber(web3.utils.toWei(this.state.PriceForSell.toString(), "ether")));
     console.log('TYPE OF SELLING ID--', this.state.IdForSale);
     console.log(this.state.ContractInstance);
 
     this.state.ContractInstance.sellData(
       this.state.IdForSale,
-      web3.fromWei(this.state.PriceForSell, "ether"), 
-      { from: this.state.account, gas: 500000 }
-      ).catch((err) => console.log(err));
+      web3.utils.toWei(this.state.PriceForSell, "ether"),
+      { from: this.state.account, gas: 5000000 }
+    )
   }
 
   errorHandling = (err) => {
@@ -202,59 +209,59 @@ class App extends Component {
       console.log(err);
     } else {
       //Display all market data
-    this.state.ContractInstance.getDataForSale().then((dataIdList) => {
-      console.log('All Market Data ID List --', dataIdList);
+      this.state.ContractInstance.getDataForSale().then((dataIdList) => {
+        console.log('All Market Data ID List --', dataIdList);
 
-      for (let i = 0; i < dataIdList.length; i++) {
-        var dataId = dataIdList[i];
-        this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
-        if(data[7] === true || data[7] === null) {
-          console.log("!!!!", data);
-          const dataForSale = [];
-          dataForSale.push({
-            Id: data[0],
-            Seller: data[1],
-            Buyer: data[2],
-            Name: data[3],
-            Description: data[4],
-            Price: web3.fromWei(data[5].toString(),"ether"),
-            IsForSale: data[7]
-          })
-          this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
-          console.log('Data for sale in state --', this.state.DataForSale[0])
+        for (let i = 0; i < dataIdList.length; i++) {
+          var dataId = dataIdList[i];
+          this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
+            if (data[7] === true || data[7] === null) {
+              console.log("!!!!", data);
+              const dataForSale = [];
+              dataForSale.push({
+                Id: data[0],
+                Seller: data[1],
+                Buyer: data[2],
+                Name: data[3],
+                Description: data[4],
+                Price: web3.utils.fromWei(data[5].toString(), "ether"),
+                IsForSale: data[7]
+              })
+              this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
+              console.log('Data for sale in state --', this.state.DataForSale[0])
+            }
+          });
         }
-        });
-      }
-    })
+      })
 
-    //Display ALL My Data
-    this.state.ContractInstance.getDataForSale().then((dataIdList) => {
+      //Display ALL My Data
+      this.state.ContractInstance.getDataForSale().then((dataIdList) => {
 
-      for (let i = 0; i < dataIdList.length; i++) {
-        var dataId = dataIdList[i];
+        for (let i = 0; i < dataIdList.length; i++) {
+          var dataId = dataIdList[i];
 
-        this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
+          this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
 
-          if (data[1] === this.state.account) {
-            console.log("My data --", data);
-            const allMyData = [];
-            allMyData.push({
-              Id: data[0],
-              Seller: data[1],
-              Buyer: data[2],
-              Name: data[3],
-              Description: data[4],
-              Price: web3.fromWei(data[5].toString(),"ether"),
-              IpfsAddress: data[6],
-              IsForSale: data[7]
-            })
+            if (data[1] === this.state.account) {
+              console.log("My data --", data);
+              const allMyData = [];
+              allMyData.push({
+                Id: data[0],
+                Seller: data[1],
+                Buyer: data[2],
+                Name: data[3],
+                Description: data[4],
+                Price: web3.utils.fromWei(data[5].toString(), "ether"),
+                IpfsAddress: data[6],
+                IsForSale: data[7]
+              })
 
-            this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
-            console.log('All My Data in state --', this.state.AllMyData);
-          }
-        });
-      }
-    })
+              this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
+              console.log('All My Data in state --', this.state.AllMyData);
+            }
+          });
+        }
+      })
 
     }
   }
@@ -319,7 +326,7 @@ class App extends Component {
 
     //bring in user's metamask account address
     // const accounts = await web3.eth.getAccounts();
-    
+
     // console.log('Sending from Metamask account: ' + accounts[0]);
 
     //obtain contract address from storehash.js
@@ -379,24 +386,37 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <h1> Ethereum and InterPlanetary File System(IPFS) with Create React App</h1>
+          <div>{this.state.account}</div>
+          <div> Amrita MVP </div>
+          <div>{this.state.balance}</div>
         </header>
 
-        <Grid>
+        {/* <Grid>
           <h3> Choose file to send to IPFS </h3>
           <div>
-            <div>{this.state.account}</div>
-            <div>{this.state.balance}</div>
+            
             <div>{this.state.DataList}</div>
             <Button bsStyle="primary" type="submit" onClick={this.handleOpen}>
               Upload Data
- </Button>
+            </Button>
             <div className='market-data'>{this.DataForSale(this.state.DataForSale)}</div>
             <div className='my-data'>{this.AllMyData(this.state.AllMyData)}</div>
           </div>
 
           <hr />
-        </Grid>
+        </Grid> */}
+
+        <div className="row">
+          <div className="column1">
+          <Button bsStyle="primary" type="submit" onClick={this.handleOpen}>
+              Upload Data
+          </Button>
+          <div className='my-data'>{this.AllMyData(this.state.AllMyData)}</div>
+          </div>
+          <div className="column2">
+          <div className='market-data'>{this.DataForSale(this.state.DataForSale)}</div>
+          </div>
+        </div>
 
         <Modal show={this.state.show} onHide={this.handleClose}>
           <Modal.Header closeButton>
