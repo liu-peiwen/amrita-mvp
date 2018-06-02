@@ -2,6 +2,7 @@ pragma solidity ^0.4.19;
 pragma experimental ABIEncoderV2;
 
 contract ChainList {
+  enum DataType {IMAGE, GENOMIC}
   // Healthcare Data struct
   struct HealthData {
     uint id;
@@ -12,6 +13,7 @@ contract ChainList {
     uint256 price;
     string ipfsAddress;
     bool isForSale;
+    DataType dataType;
   }
 
   // list of data for sale
@@ -38,7 +40,7 @@ contract ChainList {
   ); 
 
   // store ipfsAddress with data name and description into ethereum
-  function uploadData(string _name, string _description, string _ipfsAddress) public {
+  function uploadData(string _name, string _description, DataType _dataType, string _ipfsAddress) public {
    dataCounter++;
 
    dataList[dataCounter] = HealthData(
@@ -49,7 +51,8 @@ contract ChainList {
      _description,
      0x0,
      _ipfsAddress,
-     false
+     false,
+     _dataType
    );
 
    dataListByAccount[msg.sender].push(HealthData(
@@ -60,7 +63,9 @@ contract ChainList {
      _description,
      0x0,
      _ipfsAddress,
-     false));
+     false,
+     _dataType
+   ));
   }
 
   uint[] currentUserIdList;
@@ -108,7 +113,7 @@ contract ChainList {
     return forSale;
   }
 
-  function buyData(uint _id) payable public returns(string) {
+  function buyData(uint _id) payable public {
     // we check whether there is data for sale
     require(dataCounter > 0);
 
@@ -127,10 +132,5 @@ contract ChainList {
 
     // the buyer can pay the seller
     data.seller.transfer(msg.value);
-    
-    return data.ipfsAddress;
-    // trigger the event
-    //LogBuyData(_id, data.seller, data.buyer, data.name, data.price, data.ipfsAddress);
   }
 }
-

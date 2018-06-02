@@ -33,6 +33,10 @@ input[type="file"] {
     display: inline-block;
 }
 
+select > option {
+  color: lightgray;
+}
+
 .table {
       max-width: 90%;
       margin: 10px;

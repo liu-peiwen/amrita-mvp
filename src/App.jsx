@@ -1,4 +1,4 @@
-import { Grid, Button, Form, Modal } from 'react-bootstrap';
+import { Button, Form, Modal } from 'react-bootstrap';
 import React, { Component } from 'react';
 // import {BigNumber} from 'bignumber.js';
 //import logo from './logo.svg';
@@ -41,6 +41,7 @@ class App extends Component {
       IndexForSale: null,
       IdForSale: '',
       PriceForSell: null,
+      DataType: null,
 
       dataForSale: [
         { Id: '1', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
@@ -175,20 +176,19 @@ class App extends Component {
     })
   }
 
-  buyMarketData = (index) => {
+  buyMarketData = async(index) => {
 
     console.log(this.state.DataForSale[index][0].Id.toNumber());
-    this.state.ContractInstance.buyData(
+    await this.state.ContractInstance.buyData(
       this.state.DataForSale[index][0].Id,
       {
         from: this.state.account,
         value: web3.utils.toWei(this.state.DataForSale[index][0].Price)
       }
+    ).then(
+      this.state.ContractInstance.dataList(this.state.DataForSale[index][0].Id.toNumber())
+      .then(data => window.location.replace(`www.ipfs.io/ipfs/${data[6]}`))
     )
-      .then(ipfsHash => window.location.replace(`www.ipfs.io/ipfs/${ipfsHash}`))
-      .then(ipfsHash => console.log(ipfsHash))
-      .catch(err => alert(err));
-
   }
 
   sellMyData = () => {
@@ -225,7 +225,8 @@ class App extends Component {
                 Name: data[3],
                 Description: data[4],
                 Price: web3.utils.fromWei(data[5].toString(), "ether"),
-                IsForSale: data[7]
+                IsForSale: data[7],
+                DataType: data[8]
               })
               this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
               console.log('Data for sale in state --', this.state.DataForSale[0])
@@ -253,7 +254,8 @@ class App extends Component {
                 Description: data[4],
                 Price: web3.utils.fromWei(data[5].toString(), "ether"),
                 IpfsAddress: data[6],
-                IsForSale: data[7]
+                IsForSale: data[7],
+                DataType: data[8]
               })
 
               this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
@@ -319,6 +321,10 @@ class App extends Component {
     if (e.target.id === 'data_price') {
       this.setState({ PriceForSell: e.target.value });
     }
+    if (e.target.id === 'data_type') {
+      this.setState({DataType: e.target.value});
+
+    }
   }
 
   onSubmit = async (event) => {
@@ -352,10 +358,12 @@ class App extends Component {
       // gas: 500000
       // });
       // })
+      console.log(this.state.DataType);
       console.log("=====web3 version", web3.version)
       this.state.ContractInstance.uploadData(
         this.state.Name,
         this.state.Description,
+        this.state.DataType,
         ipfsHash[0].hash,
         {
           from: this.state.account,
@@ -434,7 +442,15 @@ class App extends Component {
  </div> */}
               <div className='form-group'>
                 <label>Description</label>
-                <textarea type="text" className={'form-control vresize'} id="data_description" onChange={this.handleEventChange} placeholder="Describe your article" maxLength="255"></textarea>
+                <textarea type="text" className='form-control vresize' id="data_description" onChange={this.handleEventChange} placeholder="Describe your article" maxLength="255"></textarea>
+              </div>
+              <div className='form-group'>
+                <label>Data Type</label>
+                <select className="form-control" id="data_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type">
+                  <option value="" disabled selected>Please Select Upload Data Type</option>
+                  <option value="0">Image</option>
+                  <option value="1 ">Genomic</option>
+                </select>
               </div>
               <input type='file' onChange={this.captureFile} />
             </Form>
