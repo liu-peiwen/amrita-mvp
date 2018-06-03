@@ -204,7 +204,7 @@ class App extends Component {
       this.state.IdForSale,
       web3.utils.toWei(this.state.PriceForSell, "ether"),
       { from: this.state.account, gas: 5000000 }
-    )
+    ).then(this.setState({PutItOnMarket: false}));
   }
 
   errorHandling = (err) => {
