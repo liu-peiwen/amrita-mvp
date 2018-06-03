@@ -1,4 +1,4 @@
-import { Button, Form, Modal } from 'react-bootstrap';
+import { Button, Form, Modal ,Jumbotron} from 'react-bootstrap';
 import React, { Component } from 'react';
 // import {BigNumber} from 'bignumber.js';
 //import logo from './logo.svg';
@@ -140,11 +140,13 @@ class App extends Component {
       dataforsale.map((data, index) => {
         return (
           <div key={index} className='market-data-list'>
+            <Jumbotron>
             <div className='market-data-list-item'>{data[0].Seller}</div>
             <div className='market-data-list-item'>{data[0].Name}</div>
             <div className='market-data-list-item'>{data[0].Description}</div>
             <div className='market-data-list-item'>{web3.utils.fromWei(data[0].Price, "ether")}</div>
-            <button className='btn btn-primary' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.account}>Buy</button>
+            <button className='btn btn-primary' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button>
+            </Jumbotron>
           </div>
         )
       })
@@ -156,10 +158,12 @@ class App extends Component {
       allmydata.map((data, index) => {
         return (
           <div key={index} className='my-data-list'>
+            <Jumbotron>
             <div className='my-data-list-item'>{data[0].IpfsAddress}</div>
             <div className='my-data-list-item'>{data[0].Name}</div>
             <div className='my-data-list-item'>{data[0].Description}</div>
             <button className='btn btn-primary' onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</button>
+            </Jumbotron>
           </div>
         )
       })
@@ -185,10 +189,9 @@ class App extends Component {
         from: this.state.account,
         value: web3.utils.toWei(this.state.DataForSale[index][0].Price)
       }
-    ).then(
-      this.state.ContractInstance.dataList(this.state.DataForSale[index][0].Id.toNumber())
-      .then(data => window.location.replace(`www.ipfs.io/ipfs/${data[6]}`))
-    )
+    );
+    this.state.ContractInstance.dataList(this.state.DataForSale[index][0].Id.toNumber())
+    .then(data => window.open(`https://ipfs.io/ipfs/${data[6]}`));
   }
 
   sellMyData = () => {
@@ -272,7 +275,31 @@ class App extends Component {
     event.stopPropagation()
     event.preventDefault()
     const file = event.target.files[0]
+    console.log('upload data type-------',this.state.DataType)
+    let _validFileExtensions = [];
+    if(this.state.DataType === "0") {
+      _validFileExtensions = [".dcm", ".nii.gz", ".nii", ".img", ".doc"]
+    } else if(this.state.DataType === "1") {
+    _validFileExtensions = [".vcf", ".sam"];
+    }
+    var sFileName = event.target.value;
+     if (sFileName.length > 0) {
+        var blnValid = false;
+        for (var j = 0; j < _validFileExtensions.length; j++) {
+            var sCurExtension = _validFileExtensions[j];
+            if (sFileName.substr(sFileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() === sCurExtension.toLowerCase()) {
+                blnValid = true;
+                break;
+            }
+        }
+        if (!blnValid) {
+            alert("Sorry, " + sFileName + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
+            event.target.value = "";
+            return false;
+        }
+    }
     let reader = new window.FileReader()
+    console.log("reader:",reader);
     reader.readAsArrayBuffer(file)
     reader.onloadend = () => this.convertToBuffer(reader)
   };
@@ -321,9 +348,8 @@ class App extends Component {
     if (e.target.id === 'data_price') {
       this.setState({ PriceForSell: e.target.value });
     }
-    if (e.target.id === 'data_type') {
-      this.setState({DataType: e.target.value});
-
+    if (e.target.id === 'data_type') { 
+      this.setState({DataType: e.target.value})
     }
   }
 
@@ -372,7 +398,8 @@ class App extends Component {
       this.setState({
         show: false,
         Name: '',
-        Description: ''
+        Description: '',
+        DataType: null
       });
 
 
@@ -390,7 +417,10 @@ class App extends Component {
     const isEnabled =
       this.state.Name.length > 0 &&
       this.state.Description.length > 0;
-
+    let showUploadImage = 
+      this.state.DataType === "0" ?  "form-group" : "hide-upload-button";
+    let showUploadGenomic = 
+    this.state.DataType === "1" ? "form-group" : "hide-upload-button";
     return (
       <div className="App">
         <header className="App-header">
@@ -428,7 +458,7 @@ class App extends Component {
 
         <Modal show={this.state.show} onHide={this.handleClose}>
           <Modal.Header closeButton>
-            <Modal.Title>Sell Your Data</Modal.Title>
+            <Modal.Title>Upload Your Data</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form onSubmit={this.onSubmit}>
@@ -449,10 +479,15 @@ class App extends Component {
                 <select className="form-control" id="data_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type">
                   <option value="" disabled selected>Please Select Upload Data Type</option>
                   <option value="0">Image</option>
-                  <option value="1 ">Genomic</option>
+                  <option value="1">Genomic</option>
                 </select>
               </div>
-              <input type='file' onChange={this.captureFile} />
+              <div className={showUploadImage}>
+                <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")}/>
+              </div>
+              <div className={showUploadGenomic}>
+                <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")}/>
+              </div>
             </Form>
           </Modal.Body>
           <Modal.Footer>
@@ -469,11 +504,11 @@ class App extends Component {
           <Modal.Body>
             <Form onSubmit={this.sellMyData}>
               <div className='form-group'>
-                <label>Data name</label>
+                <label>Data name:&nbsp;&nbsp;</label>
                 <label>{this.state.NameForSale}</label>
               </div>
               <div className='form-group'>
-                <label>Description</label>
+                <label>Description:&nbsp;&nbsp;</label>
                 <label>{this.state.DescriptionForSale}</label>
               </div>
               <div className="form-group">

@@ -37,6 +37,10 @@ select > option {
   color: lightgray;
 }
 
+.hide-upload-button {
+  display: none;
+}
+
 .table {
       max-width: 90%;
       margin: 10px;
@@ -50,7 +54,8 @@ select > option {
 }
 
 .market-data-list {
-  border: solid 1px grey;
+  /* border: solid 1px grey; */
+  max-width: 1000px;
 }
 .market-data-list-item {
 
