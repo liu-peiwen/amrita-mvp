@@ -42,6 +42,11 @@ class App extends Component {
       IdForSale: '',
       PriceForSell: null,
       DataType: null,
+      ImageCheck: true,
+      GenomicCheck: true,
+
+      MarketImageCheck: true,
+      MarketGenomicCheck: true,
 
       dataForSale: [
         { Id: '1', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
@@ -91,7 +96,8 @@ class App extends Component {
                   Name: data[3],
                   Description: data[4],
                   Price: web3.utils.fromWei(data[5].toString(), "ether"),
-                  IsForSale: data[7]
+                  IsForSale: data[7],
+                  DataType: data[8]
                 })
                 this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
                 console.log('Data for sale in state --', this.state.DataForSale[0])
@@ -121,7 +127,8 @@ class App extends Component {
                   Description: data[4],
                   Price: web3.utils.fromWei(data[5].toString(), "ether"),
                   IpfsAddress: data[6],
-                  IsForSale: data[7]
+                  IsForSale: data[7],
+                  DataType: data[8]
                 })
 
                 this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
@@ -136,15 +143,29 @@ class App extends Component {
   }
 
   DataForSale = (dataforsale) => {
+    let filteredData = dataforsale;
+    if (this.state.MarketImageCheck === true && this.state.MarketGenomicCheck === false) {
+      filteredData = dataforsale.filter(data => data[0].DataType.toNumber() === 0);
+    }
+    if (this.state.MarketImageCheck === false && this.state.MarketGenomicCheck === true) {
+      filteredData = dataforsale.filter(data => data[0].DataType.toNumber() === 1);
+    }
+    if (this.state.MarketImageCheck === false && this.state.MarketGenomicCheck === false) {
+      filteredData = [];
+    }
+    if (this.state.MarketImageCheck === true && this.state.MarketGenomicCheck === true) {
+      filteredData = dataforsale;
+    }
     return (
-      dataforsale.map((data, index) => {
+      filteredData.map((data, index) => {
         return (
           <div key={index} className='market-data-list'>
             <Jumbotron>
-            <div className='market-data-list-item'>{data[0].Seller}</div>
             <div className='market-data-list-item'>{data[0].Name}</div>
             <div className='market-data-list-item'>{data[0].Description}</div>
-            <div className='market-data-list-item'>{web3.utils.fromWei(data[0].Price, "ether")}</div>
+            <div className='market-data-list-item'>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image"}</div>
+            <div className='market-data-list-item'>{data[0].Price}&nbsp;ETH</div>
+            <div className='market-data-list-item'>{data[0].Seller}</div>
             <button className='btn btn-primary' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button>
             </Jumbotron>
           </div>
@@ -154,14 +175,29 @@ class App extends Component {
   }
 
   AllMyData = (allmydata) => {
+    let filteredData = allmydata;
+    if (this.state.ImageCheck === true && this.state.GenomicCheck === false) {
+      filteredData = allmydata.filter(data => data[0].DataType.toNumber() === 0);
+    }
+    if (this.state.ImageCheck === false && this.state.GenomicCheck === true) {
+      filteredData = allmydata.filter(data => data[0].DataType.toNumber() === 1);
+    }
+    if (this.state.ImageCheck === false && this.state.GenomicCheck === false) {
+      filteredData = [];
+    }
+    if (this.state.ImageCheck === true && this.state.GenomicCheck === true) {
+      filteredData = allmydata;
+    }
+    console.log(allmydata);
     return (
-      allmydata.map((data, index) => {
+      filteredData.map((data, index) => {
         return (
           <div key={index} className='my-data-list'>
             <Jumbotron>
-            <div className='my-data-list-item'>{data[0].IpfsAddress}</div>
             <div className='my-data-list-item'>{data[0].Name}</div>
             <div className='my-data-list-item'>{data[0].Description}</div>
+            <div className='my-data-list-item'>{data[0].IpfsAddress}</div>
+            <div className='my-data-list-item'>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image Data"}</div>
             <button className='btn btn-primary' onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</button>
             </Jumbotron>
           </div>
@@ -191,7 +227,7 @@ class App extends Component {
       }
     );
     this.state.ContractInstance.dataList(this.state.DataForSale[index][0].Id.toNumber())
-    .then(data => window.open(`https://ipfs.io/ipfs/${data[6]}`));
+    .then(data => window.open(`https://ipfs.io/ipfs/${data[6]}`,console.log(data[6])));
   }
 
   sellMyData = () => {
@@ -204,7 +240,71 @@ class App extends Component {
       this.state.IdForSale,
       web3.utils.toWei(this.state.PriceForSell, "ether"),
       { from: this.state.account, gas: 5000000 }
-    ).then(this.setState({PutItOnMarket: false}));
+    )
+    .then(this.refreshMarket(),this.setState({PutItOnMarket: false}))
+    
+    
+    
+  }
+
+  refreshMarket = () => {
+    //Display all market data
+    this.state.ContractInstance.getDataForSale().then((dataIdList) => {
+      console.log('All Market Data ID List --', dataIdList);
+
+      for (let i = 0; i < dataIdList.length; i++) {
+        var dataId = dataIdList[i];
+        this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
+          if (data[7] === true || data[7] === null) {
+            console.log("!!!!", data);
+            const dataForSale = [];
+            dataForSale.push({
+              Id: data[0],
+              Seller: data[1],
+              Buyer: data[2],
+              Name: data[3],
+              Description: data[4],
+              Price: web3.utils.fromWei(data[5].toString(), "ether"),
+              IsForSale: data[7],
+              DataType: data[8]
+            })
+            this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
+            console.log('Data for sale in state --', this.state.DataForSale[0])
+          }
+        });
+      }
+    })
+
+    //Display ALL My Data
+    this.state.ContractInstance.getDataForSale().then((dataIdList) => {
+
+      for (let i = 0; i < dataIdList.length; i++) {
+        var dataId = dataIdList[i];
+
+        this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
+
+          if (data[1] === this.state.account) {
+            console.log("My data --", data);
+            const allMyData = [];
+            allMyData.push({
+              Id: data[0],
+              Seller: data[1],
+              Buyer: data[2],
+              Name: data[3],
+              Description: data[4],
+              Price: web3.utils.fromWei(data[5].toString(), "ether"),
+              IpfsAddress: data[6],
+              IsForSale: data[7],
+              DataType: data[8]
+            })
+
+            this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
+            console.log('All My Data in state --', this.state.AllMyData);
+          }
+        });
+      }
+    })
+
   }
 
   errorHandling = (err) => {
@@ -349,7 +449,20 @@ class App extends Component {
       this.setState({ PriceForSell: e.target.value });
     }
     if (e.target.id === 'data_type') { 
-      this.setState({DataType: e.target.value})
+      this.setState({DataType: e.target.value});
+    }
+    if (e.target.id === 'image-check') {
+      this.setState({ImageCheck: !this.state.ImageCheck});
+
+    }
+    if (e.target.id === 'genomic-check') {
+      this.setState({GenomicCheck: !this.state.GenomicCheck});
+    }
+    if (e.target.id === 'market-image-check') {
+      this.setState({MarketImageCheck: !this.state.MarketImageCheck});
+    }
+    if (e.target.id === 'market-genomic-check') {
+      this.setState({MarketGenomicCheck: !this.state.MarketGenomicCheck});
     }
   }
 
@@ -449,9 +562,27 @@ class App extends Component {
           <Button bsStyle="primary" type="submit" onClick={this.handleOpen}>
               Upload Data
           </Button>
+          <label style={{float: "right"}}>
+          <label>Image:</label>
+          <input type="checkbox" id="image-check" checked={this.state.ImageCheck} onChange={this.handleEventChange} />
+          </label>
+          <label style={{float: "right"}}>
+          <label>Genomic:</label>
+          <input type="checkbox" id="genomic-check" checked={this.state.GenomicCheck} onChange={this.handleEventChange} />
+          </label>
           <div className='my-data'>{this.AllMyData(this.state.AllMyData)}</div>
           </div>
           <div className="column2">
+            <div>
+              <label style={{float: "right"}}>
+              <label>Image:</label>
+              <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
+              </label>
+              <label style={{float: "right"}}>
+              <label>Genomic:</label>
+              <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
+              </label>
+            </div>
           <div className='market-data'>{this.DataForSale(this.state.DataForSale)}</div>
           </div>
         </div>
