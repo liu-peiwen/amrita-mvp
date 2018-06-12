@@ -1,18 +1,20 @@
 import { Button, Form, Modal ,Jumbotron} from 'react-bootstrap';
 import React, { Component } from 'react';
-// import {BigNumber} from 'bignumber.js';
-//import logo from './logo.svg';
+
+import logo from './images/logo.png';
+import currency from './images/currency.png';
+import profile from './images/empty-profile-pic.jpg';
+import genomic from './images/genomic.png';
+import image from './images/image.png';
+
 import './App.css';
 import web3 from './web3';
 
 import ipfs from './ipfs';
-//import storehash from './storehash';
-//import TruffleContract from './truffle-contract'
+
 import chainList from './ChainList.json'
 const TruffleContract = require("truffle-contract");
-// const Web3 = require('web3');
-// const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-//var BigNumber = require('bignumber.js')
+
 
 class App extends Component {
 
@@ -42,11 +44,9 @@ class App extends Component {
       IdForSale: '',
       PriceForSell: null,
       DataType: null,
+      OpenMyData: false,
       ImageCheck: true,
       GenomicCheck: true,
-
-      MarketImageCheck: true,
-      MarketGenomicCheck: true,
 
       dataForSale: [
         { Id: '1', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
@@ -159,48 +159,65 @@ class App extends Component {
     return (
       filteredData.map((data, index) => {
         return (
-          <div key={index} className='market-data-list'>
-            <Jumbotron>
-            <div className='market-data-list-item'>{data[0].Name}</div>
-            <div className='market-data-list-item'>{data[0].Description}</div>
-            <div className='market-data-list-item'>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image"}</div>
-            <div className='market-data-list-item'>{data[0].Price}&nbsp;ETH</div>
-            <div className='market-data-list-item'>{data[0].Seller}</div>
-            <button className='btn btn-primary' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button>
-            </Jumbotron>
-          </div>
+          <tr key={index}>
+            <td style={{textAlign:"center"}}>{data[0].Name}</td>
+            <td style={{textAlign:"center"}}>{data[0].Description}</td>
+            <td style={{textAlign:"center"}}>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image Data"}</td>
+            <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;ETH</td>
+            <td style={{textAlign:"center"}}>{data[0].Seller}</td>
+            <button className='btn btn-primary' style={{float:"right"}} onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button>
+          </tr>
         )
       })
     )
   }
 
-  AllMyData = (allmydata) => {
-    let filteredData = allmydata;
-    if (this.state.ImageCheck === true && this.state.GenomicCheck === false) {
-      filteredData = allmydata.filter(data => data[0].DataType.toNumber() === 0);
-    }
-    if (this.state.ImageCheck === false && this.state.GenomicCheck === true) {
-      filteredData = allmydata.filter(data => data[0].DataType.toNumber() === 1);
-    }
-    if (this.state.ImageCheck === false && this.state.GenomicCheck === false) {
-      filteredData = [];
-    }
-    if (this.state.ImageCheck === true && this.state.GenomicCheck === true) {
-      filteredData = allmydata;
-    }
-    console.log(allmydata);
+  // AllMyData = (allmydata) => {
+  //   let filteredData = allmydata;
+  //   if (this.state.ImageCheck === true && this.state.GenomicCheck === false) {
+  //     filteredData = allmydata.filter(data => data[0].DataType.toNumber() === 0);
+  //   }
+  //   if (this.state.ImageCheck === false && this.state.GenomicCheck === true) {
+  //     filteredData = allmydata.filter(data => data[0].DataType.toNumber() === 1);
+  //   }
+  //   if (this.state.ImageCheck === false && this.state.GenomicCheck === false) {
+  //     filteredData = [];
+  //   }
+  //   if (this.state.ImageCheck === true && this.state.GenomicCheck === true) {
+  //     filteredData = allmydata;
+  //   }
+  //   console.log(allmydata);
+  //   return (
+  //     filteredData.map((data, index) => {
+  //       return (
+  //         <div key={index} className='my-data-list'>
+  //           <Jumbotron>
+  //           <div className='my-data-list-item'>{data[0].Name}</div>
+  //           <div className='my-data-list-item'>{data[0].Description}</div>
+  //           <div className='my-data-list-item'>{data[0].IpfsAddress}</div>
+  //           <div className='my-data-list-item'>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image Data"}</div>
+  //           <button className='btn btn-primary' onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</button>
+  //           </Jumbotron>
+  //         </div>
+  //       )
+  //     })
+  //   )
+  // }
+
+  AllMyData = (allmydata, isImageData) => {
+    let filteredData;
+    filteredData = allmydata.filter(data => data[0].DataType.toNumber() === isImageData);
     return (
       filteredData.map((data, index) => {
         return (
-          <div key={index} className='my-data-list'>
-            <Jumbotron>
-            <div className='my-data-list-item'>{data[0].Name}</div>
-            <div className='my-data-list-item'>{data[0].Description}</div>
-            <div className='my-data-list-item'>{data[0].IpfsAddress}</div>
-            <div className='my-data-list-item'>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image Data"}</div>
+          <tr key={index}>
+            <td style={{textAlign:"center"}}>{data[0].Name}</td>
+            <td style={{textAlign:"center"}}>{data[0].Description}</td>
+            <td style={{textAlign:"center"}}>{data[0].IpfsAddress}</td>
+            <td style={{textAlign:"center"}}>
             <button className='btn btn-primary' onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</button>
-            </Jumbotron>
-          </div>
+            </td>
+          </tr>
         )
       })
     )
@@ -413,7 +430,13 @@ class App extends Component {
 
   handleOpen = () => this.setState({ show: true });
 
-  handleClose = () => this.setState({ show: false });
+  openImageData = () => this.setState({DataType: 0, OpenMyData: true});
+
+  openGenomicData = () => this.setState({DataType: 1, OpenMyData: true});
+
+  handleMyDataClose = () => this.setState({OpenMyData: false, DataType: null});
+
+  handleClose = () => this.setState({show: false});
 
   handleSellModalClose = () => this.setState({ PutItOnMarket: false });
 
@@ -534,60 +557,294 @@ class App extends Component {
       this.state.DataType === "0" ?  "form-group" : "hide-upload-button";
     let showUploadGenomic = 
     this.state.DataType === "1" ? "form-group" : "hide-upload-button";
-    return (
-      <div className="App">
-        <header className="App-header">
-          <div>{this.state.account}</div>
-          <div> Amrita MVP </div>
-          <div>{this.state.balance}</div>
-        </header>
+//     return (
+//       <div className="App">
+//         <header className="App-header">
+//           <div>{this.state.account}</div>
+//           <div> Amrita MVP </div>
+//           <div>{this.state.balance}</div>
+//         </header>
 
-        {/* <Grid>
-          <h3> Choose file to send to IPFS </h3>
-          <div>
+
+//         <div className="row">
+//           <div className="column1">
+//           <Button bsStyle="primary" type="submit" onClick={this.handleOpen}>
+//               Upload Data
+//           </Button>
+//           <label style={{float: "right"}}>
+//           <label>Image:</label>
+//           <input type="checkbox" id="image-check" checked={this.state.ImageCheck} onChange={this.handleEventChange} />
+//           </label>
+//           <label style={{float: "right"}}>
+//           <label>Genomic:</label>
+//           <input type="checkbox" id="genomic-check" checked={this.state.GenomicCheck} onChange={this.handleEventChange} />
+//           </label>
+//           <div className='my-data'>{this.AllMyData(this.state.AllMyData)}</div>
+//           </div>
+//           <div className="column2">
+//             <div>
+//               <label style={{float: "right"}}>
+//               <label>Image:</label>
+//               <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
+//               </label>
+//               <label style={{float: "right"}}>
+//               <label>Genomic:</label>
+//               <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
+//               </label>
+//             </div>
+//           <div className='market-data'>{this.DataForSale(this.state.DataForSale)}</div>
+//           </div>
+//         </div>
+
+//         <Modal show={this.state.show} onHide={this.handleClose}>
+//           <Modal.Header closeButton>
+//             <Modal.Title>Upload Your Data</Modal.Title>
+//           </Modal.Header>
+//           <Modal.Body>
+//             <Form onSubmit={this.onSubmit}>
+//               <div className='form-group'>
+//                 <label>Data name</label>
+//                 <input type="text" className='form-control' id="data_name" onChange={this.handleEventChange} placeholder="Enter the name of your article" />
+//               </div>
+//               {/* <div className="form-group">
+//  <label for="price">Price in ETH</label>
+//  <input type="number" className="form-control" id="article_price" placeholder="1" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" />
+//  </div> */}
+//               <div className='form-group'>
+//                 <label>Description</label>
+//                 <textarea type="text" className='form-control vresize' id="data_description" onChange={this.handleEventChange} placeholder="Describe your article" maxLength="255"></textarea>
+//               </div>
+//               <div className='form-group'>
+//                 <label>Data Type</label>
+//                 <select className="form-control" id="data_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type">
+//                   <option value="" disabled selected>Please Select Upload Data Type</option>
+//                   <option value="0">Image</option>
+//                   <option value="1">Genomic</option>
+//                 </select>
+//               </div>
+//               <div className={showUploadImage}>
+//                 <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")}/>
+//               </div>
+//               <div className={showUploadGenomic}>
+//                 <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")}/>
+//               </div>
+//             </Form>
+//           </Modal.Body>
+//           <Modal.Footer>
+//             <button className='btn btn-primary' type='submit' onClick={this.onSubmit} disabled={!isEnabled}>Submit</button>
+//             <button className='btn btn-default' onClick={this.handleClose}>Close</button>
+//           </Modal.Footer>
+//         </Modal>
+
+
+//         <Modal show={this.state.PutItOnMarket} onHide={this.handleSellModalClose}>
+//           <Modal.Header closeButton>
+//             <Modal.Title>Put Your Data On The Market</Modal.Title>
+//           </Modal.Header>
+//           <Modal.Body>
+//             <Form onSubmit={this.sellMyData}>
+//               <div className='form-group'>
+//                 <label>Data name:&nbsp;&nbsp;</label>
+//                 <label>{this.state.NameForSale}</label>
+//               </div>
+//               <div className='form-group'>
+//                 <label>Description:&nbsp;&nbsp;</label>
+//                 <label>{this.state.DescriptionForSale}</label>
+//               </div>
+//               <div className="form-group">
+//                 <label>Price in ETH</label>
+//                 <input type="number" className="form-control" id="data_price" onChange={this.handleEventChange} placeholder="1" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" />
+//               </div>
+//             </Form>
+//           </Modal.Body>
+//           <Modal.Footer>
+//             <button className='btn btn-primary' type='submit' onClick={this.sellMyData}>Submit</button>
+//             <button className='btn btn-default' onClick={this.handleSellModalClose}>Close</button>
+//           </Modal.Footer>
+//         </Modal>
+
+//       </div>
+//     );
+
+return (
+  <div>
+    <header>		
+			<nav className="navbar navbar-default navbar-static-top" role="navigation">
+				<div className="navigation">				
+						<div className="navbar-header">
+							
+							<button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse.collapse">
+								<span className="sr-only">Toggle navigation</span>
+								<span className="icon-bar"></span>
+								<span className="icon-bar"></span>
+								<span className="icon-bar"></span>
+							</button>
             
-            <div>{this.state.DataList}</div>
-            <Button bsStyle="primary" type="submit" onClick={this.handleOpen}>
-              Upload Data
-            </Button>
-            <div className='market-data'>{this.DataForSale(this.state.DataForSale)}</div>
-            <div className='my-data'>{this.AllMyData(this.state.AllMyData)}</div>
-          </div>
+							<a className="navbar-brand"><img src={logo} height="50" /></a>
+						</div>
+						
+						<div className="navbar-collapse collapse">
+							<form className="navbar-form navbar-left">
+					        	<div className="form-group">
+					          		<input type="text" className="form-control" id="search-form" />
+					        	</div>
+					        	<p className="padding-5 text-center border-radius-50" id="search-icon" ><i className="fa fa-search"></i></p>
+					    </form>
+					    <ul className="nav navbar-nav navbar-right">
+								<li><a href="#" className="currency"><img src={currency} width="30" /> 100 ETH</a></li>
+								<li className="dropdown">
+									<a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img src={profile} height="30" />
+									<p> UserID </p>	 <span className="caret"></span></a>
+								</li>
+								<li><a href="#" id="messege"><i className="fa fa-comments"></i></a></li>
+							</ul>
+						</div>	
+				</div>	
+			</nav>
 
-          <hr />
-        </Grid> */}
+			<nav className="sub-navbar text-center">
+			</nav>
+			
+		</header>
 
-        <div className="row">
-          <div className="column1">
-          <Button bsStyle="primary" type="submit" onClick={this.handleOpen}>
-              Upload Data
-          </Button>
-          <label style={{float: "right"}}>
-          <label>Image:</label>
-          <input type="checkbox" id="image-check" checked={this.state.ImageCheck} onChange={this.handleEventChange} />
-          </label>
-          <label style={{float: "right"}}>
-          <label>Genomic:</label>
-          <input type="checkbox" id="genomic-check" checked={this.state.GenomicCheck} onChange={this.handleEventChange} />
-          </label>
-          <div className='my-data'>{this.AllMyData(this.state.AllMyData)}</div>
-          </div>
-          <div className="column2">
-            <div>
-              <label style={{float: "right"}}>
-              <label>Image:</label>
-              <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
-              </label>
-              <label style={{float: "right"}}>
-              <label>Genomic:</label>
-              <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
-              </label>
+
+    <div className="container">
+      <div className="row" id="section-2">
+
+        <div className="col-md-3 sidebar">
+          <div className="btn btn-green text-center btn-lg" onClick={this.handleOpen}>Upload</div>
+          {/* <div className="box top-space-10">
+            <div className="box-head">
+              <h4 className="box-title">My Data 1</h4>
             </div>
-          <div className='market-data'>{this.DataForSale(this.state.DataForSale)}</div>
-          </div>
+            <div className="box-body">
+              <p className="color-green">Address <button className="btn btn-primary btn-small pull-right">SELL</button></p>
+              <p className="top-space-10">QWERTYUIOPSDFGHJKLVBNMHGJKLASDASD</p>
+            </div>
+          </div> */}
+
+            <div className="onClickTextOverImage-image" onClick={this.openImageData}>
+                <div className="text">
+                  Image Data
+                </div>
+            </div>
+
+              <div className="onClickTextOverImage-genomic" onClick={this.openGenomicData}>
+                <div className="text">
+                  Genomic Data
+                </div>
+              </div>
         </div>
 
-        <Modal show={this.state.show} onHide={this.handleClose}>
+        <div className="col-md-9">
+
+          {/* <div className="box top-space-20 text-center">
+            <p className="top-space-20">Lorem ipsum dolor sit amet, consectetur adipisicing</p>
+            <p>Name</p>
+            <p>Data</p>
+            <p>1 ETH</p>
+            <button className="btn btn-lg btn-blue">Buy</button>
+          </div> */}
+          {/* <div className='panel panel-default'>
+            <div className='panel-head'>Market Data</div>
+            <div className='panel-body'>{this.DataForSale(this.state.DataForSale)}</div>
+          </div> */}
+
+          <table className="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Price</th>
+              <th>Data Type</th>
+              <th>Seller</th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.DataForSale(this.state.DataForSale)}
+          </tbody>
+        </table>
+        </div>
+
+      </div>
+    </div>
+
+    <div className="footer">
+      <div className="row">
+        <div className="col-sm-8">
+          <div className="col-sm-4">
+            <div className="text-center">
+              <h4>Lorem ipsum</h4>
+              <ul className="footer-menu">
+                <li>Lorem ipsum</li>
+                <li>Lorem ipsum</li>
+                <li>Lorem ipsum</li>
+                <li>Lorem ipsum</li>
+                <li>Lorem ipsum</li>
+              </ul>
+            </div>
+          </div>
+          <div className="col-sm-4">
+            <div className="text-center">
+              <h4>Lorem ipsum</h4>
+              <ul className="footer-menu">
+                <li>Lorem ipsum</li>
+                <li>Lorem ipsum</li>
+                <li>Lorem ipsum</li>
+                <li>Lorem ipsum</li>
+                <li>Lorem ipsum</li>
+              </ul>
+            </div>
+          </div>
+          <div className="col-sm-4">
+            <div className="text-center">
+              <h4>Lorem ipsum</h4>
+              <ul className="footer-menu">
+                <li>Lorem ipsum</li>
+                <li>Lorem ipsum</li>
+                <li>Lorem ipsum</li>
+                <li>Lorem ipsum</li>
+                <li>Lorem ipsum</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div className="col-sm-4 right-sidebar">
+          <div className="col-sm-8 col-sm-offset-2">
+            <div className="text-center">
+              <h4>Lorem ipsum</h4>
+              <p>A B C D</p>
+            </div>
+          </div>
+        </div>
+         
+      </div>
+    </div>
+
+    <Modal show={this.state.OpenMyData} onHide={this.handleMyDataClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>{this.state.DataType === 1 ? 'Genomic' : 'Image'} Data</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <table className="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Ipfs Address</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.AllMyData(this.state.AllMyData, this.state.DataType)}
+          </tbody>
+        </table>
+      </Modal.Body>
+    </Modal>
+
+    <Modal show={this.state.show} onHide={this.handleClose} className={Modal}>
           <Modal.Header closeButton>
             <Modal.Title>Upload Your Data</Modal.Title>
           </Modal.Header>
@@ -595,29 +852,25 @@ class App extends Component {
             <Form onSubmit={this.onSubmit}>
               <div className='form-group'>
                 <label>Data name</label>
-                <input type="text" className='form-control' id="data_name" onChange={this.handleEventChange} placeholder="Enter the name of your article" />
+                <input type="text" className='form-control' id="data_name" onChange={this.handleEventChange} placeholder="Enter the name of your article" required/>
               </div>
-              {/* <div class="form-group">
- <label for="price">Price in ETH</label>
- <input type="number" class="form-control" id="article_price" placeholder="1" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" />
- </div> */}
               <div className='form-group'>
                 <label>Description</label>
-                <textarea type="text" className='form-control vresize' id="data_description" onChange={this.handleEventChange} placeholder="Describe your article" maxLength="255"></textarea>
+                <textarea type="text" className='form-control vresize' id="data_description" onChange={this.handleEventChange} placeholder="Describe your article" maxLength="255" required></textarea>
               </div>
               <div className='form-group'>
                 <label>Data Type</label>
-                <select className="form-control" id="data_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type">
+                <select className="form-control" id="data_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
                   <option value="" disabled selected>Please Select Upload Data Type</option>
                   <option value="0">Image</option>
                   <option value="1">Genomic</option>
                 </select>
               </div>
               <div className={showUploadImage}>
-                <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")}/>
+                <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")} required/>
               </div>
               <div className={showUploadGenomic}>
-                <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")}/>
+                <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")} required/>
               </div>
             </Form>
           </Modal.Body>
@@ -626,7 +879,6 @@ class App extends Component {
             <button className='btn btn-default' onClick={this.handleClose}>Close</button>
           </Modal.Footer>
         </Modal>
-
 
         <Modal show={this.state.PutItOnMarket} onHide={this.handleSellModalClose}>
           <Modal.Header closeButton>
@@ -653,9 +905,8 @@ class App extends Component {
             <button className='btn btn-default' onClick={this.handleSellModalClose}>Close</button>
           </Modal.Footer>
         </Modal>
-
-      </div>
-    );
+    </div>
+    )
   } //render
 }
 
