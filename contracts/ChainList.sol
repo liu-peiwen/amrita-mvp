@@ -14,6 +14,7 @@ contract ChainList {
     string ipfsAddress;
     bool isForSale;
     DataType dataType;
+    string key;
   }
 
   // list of data for sale
@@ -40,7 +41,7 @@ contract ChainList {
   ); 
 
   // store ipfsAddress with data name and description into ethereum
-  function uploadData(string _name, string _description, DataType _dataType, string _ipfsAddress) public {
+  function uploadData(string _name, string _description, DataType _dataType, string _ipfsAddress, string _key) public {
    dataCounter++;
 
    dataList[dataCounter] = HealthData(
@@ -52,7 +53,8 @@ contract ChainList {
      0x0,
      _ipfsAddress,
      false,
-     _dataType
+     _dataType,
+     _key
    );
 
    dataListByAccount[msg.sender].push(HealthData(
@@ -64,7 +66,8 @@ contract ChainList {
      0x0,
      _ipfsAddress,
      false,
-     _dataType
+     _dataType,
+     _key
    ));
   }
 

@@ -13,7 +13,9 @@ import web3 from './web3';
 import ipfs from './ipfs';
 
 import chainList from './ChainList.json'
-const TruffleContract = require("truffle-contract");
+const TruffleContract = require('truffle-contract');
+const aesjs = require('aes-js');
+const fs = require('fs');
 
 
 class App extends Component {
@@ -23,6 +25,7 @@ class App extends Component {
     this.state = {
       ipfsHash: null,
       buffer: '',
+      EncryptKey: [],
       ethAddress: '',
       Name: '',
       Description: '',
@@ -97,7 +100,8 @@ class App extends Component {
                   Description: data[4],
                   Price: web3.utils.fromWei(data[5].toString(), "ether"),
                   IsForSale: data[7],
-                  DataType: data[8]
+                  DataType: data[8],
+                  EncryptKey: JSON.parse("[" + data[9] + "]")
                 })
                 this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
                 console.log('Data for sale in state --', this.state.DataForSale[0])
@@ -128,7 +132,8 @@ class App extends Component {
                   Price: web3.utils.fromWei(data[5].toString(), "ether"),
                   IpfsAddress: data[6],
                   IsForSale: data[7],
-                  DataType: data[8]
+                  DataType: data[8],
+                  EncryptKey: JSON.parse("[" + data[9] + "]")
                 })
 
                 this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
@@ -233,6 +238,26 @@ class App extends Component {
     })
   }
 
+  decryptData = (data, key) => {
+    console.log("PASS IN DATA---", data.toString('hex'));
+    // When ready to decrypt the hex string, convert it back to bytes
+    let encryptedBytes = aesjs.utils.hex.toBytes(data.toString('hex'));
+
+    // The counter mode of operation maintains internal state, so to
+    // decrypt a new instance must be instantiated.
+    let aesCtr = new aesjs.ModeOfOperation.ctr(key, new aesjs.Counter(5));
+    let decryptedBytes = aesCtr.decrypt(encryptedBytes);
+
+    // Convert our bytes back into text
+    let decryptedText = aesjs.utils.utf8.fromBytes(decryptedBytes);
+    console.log("Decrypted------", decryptedText);
+    //fs.writeFile("Users/Lee/Downloads", decryptedText, err => console.log(err));
+    fs.writeFile('mynewfile3.txt', 'Hello content!', function (err) {
+      if (err) throw err;
+      console.log('Saved!');
+    });
+  }
+
   buyMarketData = async(index) => {
 
     console.log(this.state.DataForSale[index][0].Id.toNumber());
@@ -244,7 +269,7 @@ class App extends Component {
       }
     );
     this.state.ContractInstance.dataList(this.state.DataForSale[index][0].Id.toNumber())
-    .then(data => window.open(`https://ipfs.io/ipfs/${data[6]}`,console.log(data[6])));
+    .then(data => ipfs.files.get(data[6], (err, files) => this.decryptData(files[0].content, this.state.DataForSale[index][0].EncryptKey)));
   }
 
   sellMyData = () => {
@@ -421,11 +446,31 @@ class App extends Component {
     reader.onloadend = () => this.convertToBuffer(reader)
   };
 
+  randomArray = (length, max) => [...new Array(length)]
+    .map(() => Math.round(Math.random() * max));
+
   convertToBuffer = async (reader) => {
     //file is converted to a buffer to prepare for uploading to IPFS
     const buffer = await Buffer.from(reader.result);
     //set this buffer -using es6 syntax
-    this.setState({ buffer });
+    let key = this.randomArray(16, 100);
+    console.log("KEY---", key);
+    console.log("BUFFER---", buffer);
+    // Convert text to bytes
+    let textBytes = aesjs.utils.utf8.toBytes(buffer);
+
+    // The counter is optional, and if omitted will begin at 1
+    let aesCtr = new aesjs.ModeOfOperation.ctr(key, new aesjs.Counter(5));
+    let encryptedBytes = aesCtr.encrypt(textBytes);
+
+    // To print or store the binary data, you may convert it to hex
+    let encryptedHex = aesjs.utils.hex.fromBytes(encryptedBytes);
+    console.log("encryptionHEX-----", encryptedHex);
+    //file is encrypted and convert to a new buffer to prepare for uploading for IPFS
+    const encryptedBuffer = await Buffer.from(encryptedHex);
+    console.log("EncryptBuffer----",encryptedBuffer);
+
+    this.setState({ buffer: encryptedBuffer, EncryptKey: key });
   };
 
   handleOpen = () => this.setState({ show: true });
@@ -503,7 +548,7 @@ class App extends Component {
 
     //save document to IPFS,return its hash#, and set hash# to state
     //https://github.com/ipfs/interface-ipfs-core/blob/master/SPEC/FILES.md#add
-    await ipfs.add(this.state.buffer, (err, ipfsHash, name, description) => {
+    await ipfs.add(this.state.buffer, (err, ipfsHash) => {
       console.log(err, ipfsHash);
       //setState by setting ipfsHash to ipfsHash[0].hash
       this.setState({ ipfsHash: ipfsHash[0].hash });
@@ -521,30 +566,24 @@ class App extends Component {
       // });
       // })
       console.log(this.state.DataType);
-      console.log("=====web3 version", web3.version)
+      console.log("=====web3 version", web3.version);
+      console.log("EncryptKey", this.state.EncryptKey);
       this.state.ContractInstance.uploadData(
         this.state.Name,
         this.state.Description,
         this.state.DataType,
         ipfsHash[0].hash,
+        this.state.EncryptKey.toString(),
         {
           from: this.state.account,
           gas: 500000
-        });
+        }).catch(err => console.log(err));
       this.setState({
         show: false,
         Name: '',
         Description: '',
         DataType: null
       });
-
-
-      // storehash.methods.sendHash(this.state.ipfsHash).send({
-      // from: accounts[0]
-      // }, (error, transactionHash) => {
-      // console.log(transactionHash);
-      // this.setState({transactionHash});
-      // }); //storehash 
 
     }) //await ipfs.add 
   }; //onSubmit 
