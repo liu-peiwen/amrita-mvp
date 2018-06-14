@@ -15,6 +15,7 @@ contract ChainList {
     bool isForSale;
     DataType dataType;
     string key;
+    string extension;
   }
 
   // list of data for sale
@@ -41,7 +42,7 @@ contract ChainList {
   ); 
 
   // store ipfsAddress with data name and description into ethereum
-  function uploadData(string _name, string _description, DataType _dataType, string _ipfsAddress, string _key) public {
+  function uploadData(string _name, string _description, DataType _dataType, string _ipfsAddress, string _key, string _extension) public {
    dataCounter++;
 
    dataList[dataCounter] = HealthData(
@@ -54,7 +55,8 @@ contract ChainList {
      _ipfsAddress,
      false,
      _dataType,
-     _key
+     _key,
+     _extension
    );
 
    dataListByAccount[msg.sender].push(HealthData(
@@ -67,7 +69,8 @@ contract ChainList {
      _ipfsAddress,
      false,
      _dataType,
-     _key
+     _key,
+     _extension
    ));
   }
 
@@ -120,10 +123,10 @@ contract ChainList {
     // we check whether there is data for sale
     require(dataCounter > 0);
 
-    // we check that the article exists
+    // we check that the data exists
     require(_id > 0 && _id <= dataCounter);
 
-    // we retrieve the article
+    // we retrieve the data
     HealthData storage data = dataList[_id];
 
     require(data.isForSale = true);

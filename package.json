@@ -31,8 +31,13 @@
   },
   "dependencies": {
     "aes-js": "^3.1.1",
+    "antd": "^3.6.2",
     "bignumber": "^1.1.0",
+    "browserify-fs": "^1.0.0",
+    "font-awesome": "^4.7.0",
     "fs": "0.0.1-security",
+    "fs-js": "^1.0.6",
+    "react-tooltip": "^3.6.1",
     "truffle-contract": "^3.0.5"
   }
 }

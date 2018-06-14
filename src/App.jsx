@@ -6,6 +6,7 @@ import currency from './images/currency.png';
 import profile from './images/empty-profile-pic.jpg';
 import genomic from './images/genomic.png';
 import image from './images/image.png';
+import ReactTooltip from 'react-tooltip';
 
 import './App.css';
 import web3 from './web3';
@@ -15,7 +16,7 @@ import ipfs from './ipfs';
 import chainList from './ChainList.json'
 const TruffleContract = require('truffle-contract');
 const aesjs = require('aes-js');
-const fs = require('fs');
+const fs = require('browserify-fs');
 
 
 class App extends Component {
@@ -50,6 +51,10 @@ class App extends Component {
       OpenMyData: false,
       ImageCheck: true,
       GenomicCheck: true,
+      FileExtension:'',
+      DecryptedText:'',
+      MarketImageCheck: true,
+      MarketGenomicCheck: true,
 
       dataForSale: [
         { Id: '1', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
@@ -74,7 +79,7 @@ class App extends Component {
       //Initial Account and Get Balance
       this.setState({ account });
       web3.eth.getBalance(account, (err, balance) => {
-        this.setState({ balance: web3.utils.fromWei(balance, "ether") + " ETH" });
+        this.setState({ balance: Number(web3.utils.fromWei(balance, "ether")).toFixed(2) + " ETH" });
       })
       //Instantiate Contract
       this.contract.deployed().then((contractInstance) => {
@@ -101,7 +106,8 @@ class App extends Component {
                   Price: web3.utils.fromWei(data[5].toString(), "ether"),
                   IsForSale: data[7],
                   DataType: data[8],
-                  EncryptKey: JSON.parse("[" + data[9] + "]")
+                  EncryptKey: JSON.parse("[" + data[9] + "]"),
+                  FileExtension: data[10]
                 })
                 this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
                 console.log('Data for sale in state --', this.state.DataForSale[0])
@@ -133,7 +139,8 @@ class App extends Component {
                   IpfsAddress: data[6],
                   IsForSale: data[7],
                   DataType: data[8],
-                  EncryptKey: JSON.parse("[" + data[9] + "]")
+                  EncryptKey: JSON.parse("[" + data[9] + "]"),
+                  FileExtension: data[10]
                 })
 
                 this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
@@ -163,14 +170,15 @@ class App extends Component {
     }
     return (
       filteredData.map((data, index) => {
+        let userOwnData = data[0].Seller === this.state.account ? "can-not-buy" : "";
         return (
-          <tr key={index}>
+          <tr key={index} className={userOwnData}>
             <td style={{textAlign:"center"}}>{data[0].Name}</td>
             <td style={{textAlign:"center"}}>{data[0].Description}</td>
             <td style={{textAlign:"center"}}>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image Data"}</td>
             <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;ETH</td>
             <td style={{textAlign:"center"}}>{data[0].Seller}</td>
-            <button className='btn btn-primary' style={{float:"right"}} onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button>
+            <td style={{textAlign:"center"}}><button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button></td>
           </tr>
         )
       })
@@ -238,10 +246,38 @@ class App extends Component {
     })
   }
 
+   onInitFs = (fs) => {
+
+  fs.root.getFile('/Users/Lee/Desktop/log.txt', {create: true}, function(fileEntry) {
+
+    // Create a FileWriter object for our FileEntry (log.txt).
+    fileEntry.createWriter(function(fileWriter) {
+
+      fileWriter.onwriteend = function(e) {
+        console.log('Write completed.');
+      };
+
+      fileWriter.onerror = function(e) {
+        console.log('Write failed: ' + e.toString());
+      };
+
+      // Create a new Blob and write it to log.txt.
+      var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
+
+      fileWriter.write(blob);
+
+    }, err => err);
+
+  }, err => err);
+
+}
+
+
   decryptData = (data, key) => {
-    console.log("PASS IN DATA---", data.toString('hex'));
+    //console.log("PASS IN DATA---", data.toString('hex'));
     // When ready to decrypt the hex string, convert it back to bytes
-    let encryptedBytes = aesjs.utils.hex.toBytes(data.toString('hex'));
+    console.log("encryptedIPFS",data)
+    let encryptedBytes = aesjs.utils.hex.toBytes(data);
 
     // The counter mode of operation maintains internal state, so to
     // decrypt a new instance must be instantiated.
@@ -251,11 +287,16 @@ class App extends Component {
     // Convert our bytes back into text
     let decryptedText = aesjs.utils.utf8.fromBytes(decryptedBytes);
     console.log("Decrypted------", decryptedText);
-    //fs.writeFile("Users/Lee/Downloads", decryptedText, err => console.log(err));
-    fs.writeFile('mynewfile3.txt', 'Hello content!', function (err) {
-      if (err) throw err;
-      console.log('Saved!');
-    });
+    this.setState({DecryptedText: decryptedText})
+    //this.setState({FileExtension: this.state.DataForSale[index][0].FileExtension});
+    //console.log("filename=====", `test.${this.state.FileExtension}`);
+
+    // window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
+    // window.requestFileSystem(window.TEMPORARY, 1024*1024, this.onInitFs, err => err);
+    //fs.writeFile("test.text", '1234124', err => err ? console.log(err) : null);
+    //fs.writeFile(`.../downloads/test.${this.state.FileExtension}`, this.state.DecryptedText, err => err ? console.log(err) : null);
+    window.open(`https://ipfs.io/ipfs/${this.state.DecryptedText}`)
+    console.log("DONE!!!");
   }
 
   buyMarketData = async(index) => {
@@ -269,7 +310,9 @@ class App extends Component {
       }
     );
     this.state.ContractInstance.dataList(this.state.DataForSale[index][0].Id.toNumber())
-    .then(data => ipfs.files.get(data[6], (err, files) => this.decryptData(files[0].content, this.state.DataForSale[index][0].EncryptKey)));
+    .then(data => this.decryptData(data[6], this.state.DataForSale[index][0].EncryptKey));
+    // .then(data => ipfs.files.get(data[6], (err, files) => this.decryptData(index,files[0].content, this.state.DataForSale[index][0].EncryptKey)));
+    
   }
 
   sellMyData = () => {
@@ -425,6 +468,8 @@ class App extends Component {
     _validFileExtensions = [".vcf", ".sam"];
     }
     var sFileName = event.target.value;
+    var extension = sFileName.substring(sFileName.lastIndexOf('.')+1);
+    this.setState({FileExtension: extension});
      if (sFileName.length > 0) {
         var blnValid = false;
         for (var j = 0; j < _validFileExtensions.length; j++) {
@@ -470,7 +515,8 @@ class App extends Component {
     const encryptedBuffer = await Buffer.from(encryptedHex);
     console.log("EncryptBuffer----",encryptedBuffer);
 
-    this.setState({ buffer: encryptedBuffer, EncryptKey: key });
+    // this.setState({ buffer: encryptedBuffer, EncryptKey: key });
+    this.setState({ buffer });
   };
 
   handleOpen = () => this.setState({ show: true });
@@ -551,7 +597,22 @@ class App extends Component {
     await ipfs.add(this.state.buffer, (err, ipfsHash) => {
       console.log(err, ipfsHash);
       //setState by setting ipfsHash to ipfsHash[0].hash
-      this.setState({ ipfsHash: ipfsHash[0].hash });
+      //set this buffer -using es6 syntax
+    let key = this.randomArray(16, 100);
+    console.log("KEY---", key);
+    console.log("BUFFER---", ipfsHash[0].hash);
+    // Convert text to bytes
+    let textBytes = aesjs.utils.utf8.toBytes(ipfsHash[0].hash);
+
+    // The counter is optional, and if omitted will begin at 1
+    let aesCtr = new aesjs.ModeOfOperation.ctr(key, new aesjs.Counter(5));
+    let encryptedBytes = aesCtr.encrypt(textBytes);
+
+    // To print or store the binary data, you may convert it to hex
+    let encryptedHex = aesjs.utils.hex.fromBytes(encryptedBytes);
+    console.log("encryptionHEX-----", encryptedHex);
+
+      this.setState({ ipfsHash: encryptedHex, EncryptKey: key });
 
       // call Ethereum contract method "sendHash" and .send IPFS hash to etheruem contract 
       //return the transaction hash from the ethereum contract
@@ -572,8 +633,9 @@ class App extends Component {
         this.state.Name,
         this.state.Description,
         this.state.DataType,
-        ipfsHash[0].hash,
+        this.state.ipfsHash,
         this.state.EncryptKey.toString(),
+        this.state.FileExtension,
         {
           from: this.state.account,
           gas: 500000
@@ -582,7 +644,8 @@ class App extends Component {
         show: false,
         Name: '',
         Description: '',
-        DataType: null
+        DataType: null,
+        FileExtension:''
       });
 
     }) //await ipfs.add 
@@ -730,10 +793,14 @@ return (
 					        	<p className="padding-5 text-center border-radius-50" id="search-icon" ><i className="fa fa-search"></i></p>
 					    </form>
 					    <ul className="nav navbar-nav navbar-right">
-								<li><a href="#" className="currency"><img src={currency} width="30" /> 100 ETH</a></li>
+								<li><a href="#" className="currency"><img src={currency} width="30" /> {this.state.balance}</a></li>
 								<li className="dropdown">
-									<a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img src={profile} height="30" />
-									<p> UserID </p>	 <span className="caret"></span></a>
+									<a href="#" className="dropdown-toggle" data-tip="React-tooltip" data-toggle="dropdown" role="button" ><img src={profile} height="30" />
+								  <p className="account-info"> {this.state.account} </p></a>
+                  <ReactTooltip place="bottom" type="dark" effect="solid">
+                    <span>{this.state.account}</span>
+                  </ReactTooltip>
+                  
 								</li>
 								<li><a href="#" id="messege"><i className="fa fa-comments"></i></a></li>
 							</ul>
@@ -761,7 +828,7 @@ return (
               <p className="top-space-10">QWERTYUIOPSDFGHJKLVBNMHGJKLASDASD</p>
             </div>
           </div> */}
-
+          <div className="top-space-10">
             <div className="onClickTextOverImage-image" onClick={this.openImageData}>
                 <div className="text">
                   Image Data
@@ -773,6 +840,7 @@ return (
                   Genomic Data
                 </div>
               </div>
+        </div>
         </div>
 
         <div className="col-md-9">
@@ -789,16 +857,26 @@ return (
             <div className='panel-body'>{this.DataForSale(this.state.DataForSale)}</div>
           </div> */}
 
-          <table className="table table-hover">
+          <table className="table table-bordered table-striped">
           <thead>
             <tr>
               <th>Name</th>
               <th>Description</th>
-              <th>Price</th>
               <th>Data Type</th>
+              <th>Price</th>
               <th>Seller</th>
-              <th></th>
-              <th></th>
+              <th>
+              <label style={{display: 'flex', justifyContent: 'center'}}>
+              <label >
+              <label>Image:</label>
+               <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
+               </label>
+               <label >
+               <label>Genomic:</label>
+               <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
+             </label>
+             </label>
+              </th>
             </tr>
           </thead>
           <tbody>

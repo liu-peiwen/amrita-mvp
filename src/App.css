@@ -659,27 +659,16 @@ nav.navbar {
   position: relative;
 }
 
-.onClickTextOverImage *{
-
-}
-
 .click-image:hover {
   opacity: .4;
 }
 
-/* .click-image {
-  height:250px;
-  width: 250px;
-  display: block;
-  background-size: cover;
-  background: url('./images/genomic.png');
-} */
 .onClickTextOverImage-image{
   width:200px;
   height:200px;
   background-size:cover;
-  display:inline-block;
-  margin:4px;
+  display: table;
+  margin: 10px auto;
   border-radius:16px;
   box-shadow:0 0 16px rgba(0,0,0,0.5);
   position:relative;
@@ -690,8 +679,8 @@ nav.navbar {
   width:200px;
   height:200px;
   background-size:cover;
-  display:inline-block;
-  margin:4px;
+  display: table;
+  margin: 10px auto;
   border-radius:16px;
   box-shadow:0 0 16px rgba(0,0,0,0.5);
   position:relative;
@@ -727,15 +716,36 @@ nav.navbar {
 table {
   /* table-layout: fixed;
   width: 50px; */
+  border-radius: 4px;
 }
 
 td {
   max-width: 70px;
+  font-size: 18px !important;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
   padding: 5px 0;
+  vertical-align: middle !important;
 }
 .market-data {
   display: flex;
+}
+
+.table-striped > tbody > tr:nth-child(2n+1) > td, .table-striped > tbody > tr:nth-child(2n+1) > th {
+  background-color: #2F8ECE;
+}
+.table-striped > tbody > tr:nth-child(2n) > td, .table-striped > tbody > tr:nth-child(2n) > th {
+  background-color: #ffffff;
+}
+
+.account-info {
+  width: 150px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.can-not-buy td{
+  background-color: gray !important;
 }
