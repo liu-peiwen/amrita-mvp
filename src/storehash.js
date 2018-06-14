@@ -1,4 +1,6 @@
 import web3 from './web3';
+// const Web3 = require('web3');
+// const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 
 //access our local copy to contract deployed on rinkeby testnet
 //use your own contract address

@@ -1,6 +1,8 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
+pragma experimental ABIEncoderV2;
 
 contract ChainList {
+  enum DataType {IMAGE, GENOMIC}
   // Healthcare Data struct
   struct HealthData {
     uint id;
@@ -11,6 +13,8 @@ contract ChainList {
     uint256 price;
     string ipfsAddress;
     bool isForSale;
+    DataType dataType;
+    string key;
   }
 
   // list of data for sale
@@ -36,8 +40,8 @@ contract ChainList {
     string _ipfsAddress
   ); 
 
-  // store ipfsAddress with data name and description into ipfs
-  function uploadData(string _name, string _description, string _ipfsAddress) public {
+  // store ipfsAddress with data name and description into ethereum
+  function uploadData(string _name, string _description, DataType _dataType, string _ipfsAddress, string _key) public {
    dataCounter++;
 
    dataList[dataCounter] = HealthData(
@@ -48,7 +52,9 @@ contract ChainList {
      _description,
      0x0,
      _ipfsAddress,
-     false
+     false,
+     _dataType,
+     _key
    );
 
    dataListByAccount[msg.sender].push(HealthData(
@@ -59,41 +65,28 @@ contract ChainList {
      _description,
      0x0,
      _ipfsAddress,
-     false));
-<<<<<<< HEAD
+     false,
+     _dataType,
+     _key
+   ));
   }
 
-  // fetch all of current user's data for sale 
-  function getAllMyData(address currentUser) public returns (HealthData[]) {
-    return dataListByAccount[currentUser];
-  }
+  uint[] currentUserIdList;
 
-  // sell a data
-  function sellData(uint _id, address currentUser, uint256 _price) public {
-    // add price of the data and change isForSale flag of the data to true 
-    dataList[_id].price = _price;
-    dataList[_id].isForSale = true;
 
-    HealthData[] HealthDataListByCurrentUser = dataListByAccount[currentUser];
-
-    for (uint i = 0; i < HealthDataListByCurrentUser.length; i++) {
-      if (HealthDataListByCurrentUser[i].id == _id) {
-        HealthDataListByCurrentUser[i].isForSale = true;
-        HealthDataListByCurrentUser[i].price= _price;
+  function getAllMyData(address currentUser) public constant returns (uint[]) {    
+    for(uint i = 1; i <= dataCounter;  i++) {
+      if (dataList[i].seller == currentUser){
+        currentUserIdList.push(i);
       }
     }
-=======
+    return currentUserIdList;
   }
 
-  // fetch all of current user's data for sale 
-  function getAllMyData(address currentUser) public returns (HealthData[]) {
-    return dataListByAccount[currentUser];
-  }
-
-  // sell a data
-  function sellData(string _name, string _description, uint256 _price,string _ipfsAddress) public {
-    
->>>>>>> 5544c9f758c0cda77c9e1623f4c63291a86c1522
+  function sellData(uint _id, uint256 _price) public { 
+    require(dataList[_id].isForSale == false);
+    dataList[_id].price = _price; 
+    dataList[_id].isForSale = true; 
   }
 
   // fetch the number of data in the contract
@@ -101,7 +94,7 @@ contract ChainList {
     return dataCounter;
   }
 
-  // fetch and return all data IDs for data still for sale
+  // fetch and return all data IDs for data with isForSale being true
   function getDataForSale() public view returns (uint[]) {
     // prepare output array
     uint[] memory dataIds = new uint[](dataCounter);
@@ -109,9 +102,10 @@ contract ChainList {
     uint numberOfDataForSale = 0;
     // iterate over data
     for(uint i = 1; i <= dataCounter;  i++) {
-      // keep the ID if the data is still for sale
-      dataIds[numberOfDataForSale] = dataList[i].id;
-      numberOfDataForSale++;
+      if(dataList[i].isForSale == true) {
+        dataIds[numberOfDataForSale] = dataList[i].id;
+        numberOfDataForSale++;
+      }
     }
 
     // copy the data Ids array into a smaller forSale array
@@ -122,33 +116,24 @@ contract ChainList {
     return forSale;
   }
 
-  // buy data
   function buyData(uint _id) payable public {
-    // we check whether there is an data for sale
+    // we check whether there is data for sale
     require(dataCounter > 0);
 
-    // we check that the data exists
+    // we check that the article exists
     require(_id > 0 && _id <= dataCounter);
 
-    // we retrieve the data
+    // we retrieve the article
     HealthData storage data = dataList[_id];
 
-    // we check that the data has not been sold yet
-    require(data.buyer == 0X0);
+    require(data.isForSale = true);
 
-    // we don't allow the seller to buy his own data
     require(msg.sender != data.seller);
 
     // we check that the value sent corresponds to the price of the data
     require(msg.value == data.price);
 
-    // keep buyer's information
-    data.buyer = msg.sender;
-
     // the buyer can pay the seller
     data.seller.transfer(msg.value);
-
-    // trigger the event
-    LogBuyData(_id, data.seller, data.buyer, data.name, data.price, data.ipfsAddress);
   }
 }
