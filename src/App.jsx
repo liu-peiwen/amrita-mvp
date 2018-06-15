@@ -169,53 +169,22 @@ class App extends Component {
       filteredData = dataforsale;
     }
     return (
+      filteredData ?
       filteredData.map((data, index) => {
         let userOwnData = data[0].Seller === this.state.account ? "can-not-buy" : "";
         return (
-          <tr key={index} className={userOwnData}>
+          <tr key={index}>
             <td style={{textAlign:"center"}}>{data[0].Name}</td>
             <td style={{textAlign:"center"}}>{data[0].Description}</td>
             <td style={{textAlign:"center"}}>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image Data"}</td>
             <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;ETH</td>
             <td style={{textAlign:"center"}}>{data[0].Seller}</td>
-            <td style={{textAlign:"center"}}><button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button></td>
+            <td style={{textAlign:"center"}} className={userOwnData}><button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button></td>
           </tr>
         )
-      })
+      }) : null
     )
   }
-
-  // AllMyData = (allmydata) => {
-  //   let filteredData = allmydata;
-  //   if (this.state.ImageCheck === true && this.state.GenomicCheck === false) {
-  //     filteredData = allmydata.filter(data => data[0].DataType.toNumber() === 0);
-  //   }
-  //   if (this.state.ImageCheck === false && this.state.GenomicCheck === true) {
-  //     filteredData = allmydata.filter(data => data[0].DataType.toNumber() === 1);
-  //   }
-  //   if (this.state.ImageCheck === false && this.state.GenomicCheck === false) {
-  //     filteredData = [];
-  //   }
-  //   if (this.state.ImageCheck === true && this.state.GenomicCheck === true) {
-  //     filteredData = allmydata;
-  //   }
-  //   console.log(allmydata);
-  //   return (
-  //     filteredData.map((data, index) => {
-  //       return (
-  //         <div key={index} className='my-data-list'>
-  //           <Jumbotron>
-  //           <div className='my-data-list-item'>{data[0].Name}</div>
-  //           <div className='my-data-list-item'>{data[0].Description}</div>
-  //           <div className='my-data-list-item'>{data[0].IpfsAddress}</div>
-  //           <div className='my-data-list-item'>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image Data"}</div>
-  //           <button className='btn btn-primary' onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</button>
-  //           </Jumbotron>
-  //         </div>
-  //       )
-  //     })
-  //   )
-  // }
 
   AllMyData = (allmydata, isImageData) => {
     let filteredData;
@@ -246,33 +215,7 @@ class App extends Component {
     })
   }
 
-   onInitFs = (fs) => {
-
-  fs.root.getFile('/Users/Lee/Desktop/log.txt', {create: true}, function(fileEntry) {
-
-    // Create a FileWriter object for our FileEntry (log.txt).
-    fileEntry.createWriter(function(fileWriter) {
-
-      fileWriter.onwriteend = function(e) {
-        console.log('Write completed.');
-      };
-
-      fileWriter.onerror = function(e) {
-        console.log('Write failed: ' + e.toString());
-      };
-
-      // Create a new Blob and write it to log.txt.
-      var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
-
-      fileWriter.write(blob);
-
-    }, err => err);
-
-  }, err => err);
-
-}
-
-
+   
   decryptData = (data, key) => {
     //console.log("PASS IN DATA---", data.toString('hex'));
     // When ready to decrypt the hex string, convert it back to bytes
@@ -326,17 +269,15 @@ class App extends Component {
       web3.utils.toWei(this.state.PriceForSell, "ether"),
       { from: this.state.account, gas: 5000000 }
     )
-    .then(this.refreshMarket(),this.setState({PutItOnMarket: false}))
-    
-    
-    
+    .then(this.setState({PutItOnMarket: false, OpenMyData: false}), this.refreshMarket());
+    console.log("Finished!!!!!!!!");
   }
 
   refreshMarket = () => {
     //Display all market data
     this.state.ContractInstance.getDataForSale().then((dataIdList) => {
       console.log('All Market Data ID List --', dataIdList);
-
+      this.setState({DataForSale: ''});
       for (let i = 0; i < dataIdList.length; i++) {
         var dataId = dataIdList[i];
         this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
@@ -362,7 +303,7 @@ class App extends Component {
 
     //Display ALL My Data
     this.state.ContractInstance.getDataForSale().then((dataIdList) => {
-
+      this.setState({AllMyData: ''});
       for (let i = 0; i < dataIdList.length; i++) {
         var dataId = dataIdList[i];
 
@@ -521,9 +462,21 @@ class App extends Component {
 
   handleOpen = () => this.setState({ show: true });
 
-  openImageData = () => this.setState({DataType: 0, OpenMyData: true});
+  openImageData = () => {
+    this.setState({
+      DataType: 0, 
+      OpenMyData: true
+    });
+    //this.refreshMarket();
+  };
 
-  openGenomicData = () => this.setState({DataType: 1, OpenMyData: true});
+  openGenomicData = () => {
+    this.setState({
+      DataType: 1,
+      OpenMyData: true
+    });
+    //this.refreshMarket();
+  };
 
   handleMyDataClose = () => this.setState({OpenMyData: false, DataType: null});
 
@@ -619,13 +572,7 @@ class App extends Component {
       //see, this https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send
       console.log('State', this.state.Name, this.state.Description);
 
-      // this.contract.deployed().then((contractInstance) => {
-      // console.log(contractInstance)
-      // contractInstance.uploadData(this.state.Name,this.state.Description,ipfsHash[0].hash,{
-      // from: this.state.account,
-      // gas: 500000
-      // });
-      // })
+      
       console.log(this.state.DataType);
       console.log("=====web3 version", web3.version);
       console.log("EncryptKey", this.state.EncryptKey);
@@ -659,114 +606,6 @@ class App extends Component {
       this.state.DataType === "0" ?  "form-group" : "hide-upload-button";
     let showUploadGenomic = 
     this.state.DataType === "1" ? "form-group" : "hide-upload-button";
-//     return (
-//       <div className="App">
-//         <header className="App-header">
-//           <div>{this.state.account}</div>
-//           <div> Amrita MVP </div>
-//           <div>{this.state.balance}</div>
-//         </header>
-
-
-//         <div className="row">
-//           <div className="column1">
-//           <Button bsStyle="primary" type="submit" onClick={this.handleOpen}>
-//               Upload Data
-//           </Button>
-//           <label style={{float: "right"}}>
-//           <label>Image:</label>
-//           <input type="checkbox" id="image-check" checked={this.state.ImageCheck} onChange={this.handleEventChange} />
-//           </label>
-//           <label style={{float: "right"}}>
-//           <label>Genomic:</label>
-//           <input type="checkbox" id="genomic-check" checked={this.state.GenomicCheck} onChange={this.handleEventChange} />
-//           </label>
-//           <div className='my-data'>{this.AllMyData(this.state.AllMyData)}</div>
-//           </div>
-//           <div className="column2">
-//             <div>
-//               <label style={{float: "right"}}>
-//               <label>Image:</label>
-//               <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
-//               </label>
-//               <label style={{float: "right"}}>
-//               <label>Genomic:</label>
-//               <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
-//               </label>
-//             </div>
-//           <div className='market-data'>{this.DataForSale(this.state.DataForSale)}</div>
-//           </div>
-//         </div>
-
-//         <Modal show={this.state.show} onHide={this.handleClose}>
-//           <Modal.Header closeButton>
-//             <Modal.Title>Upload Your Data</Modal.Title>
-//           </Modal.Header>
-//           <Modal.Body>
-//             <Form onSubmit={this.onSubmit}>
-//               <div className='form-group'>
-//                 <label>Data name</label>
-//                 <input type="text" className='form-control' id="data_name" onChange={this.handleEventChange} placeholder="Enter the name of your article" />
-//               </div>
-//               {/* <div className="form-group">
-//  <label for="price">Price in ETH</label>
-//  <input type="number" className="form-control" id="article_price" placeholder="1" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" />
-//  </div> */}
-//               <div className='form-group'>
-//                 <label>Description</label>
-//                 <textarea type="text" className='form-control vresize' id="data_description" onChange={this.handleEventChange} placeholder="Describe your article" maxLength="255"></textarea>
-//               </div>
-//               <div className='form-group'>
-//                 <label>Data Type</label>
-//                 <select className="form-control" id="data_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type">
-//                   <option value="" disabled selected>Please Select Upload Data Type</option>
-//                   <option value="0">Image</option>
-//                   <option value="1">Genomic</option>
-//                 </select>
-//               </div>
-//               <div className={showUploadImage}>
-//                 <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")}/>
-//               </div>
-//               <div className={showUploadGenomic}>
-//                 <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")}/>
-//               </div>
-//             </Form>
-//           </Modal.Body>
-//           <Modal.Footer>
-//             <button className='btn btn-primary' type='submit' onClick={this.onSubmit} disabled={!isEnabled}>Submit</button>
-//             <button className='btn btn-default' onClick={this.handleClose}>Close</button>
-//           </Modal.Footer>
-//         </Modal>
-
-
-//         <Modal show={this.state.PutItOnMarket} onHide={this.handleSellModalClose}>
-//           <Modal.Header closeButton>
-//             <Modal.Title>Put Your Data On The Market</Modal.Title>
-//           </Modal.Header>
-//           <Modal.Body>
-//             <Form onSubmit={this.sellMyData}>
-//               <div className='form-group'>
-//                 <label>Data name:&nbsp;&nbsp;</label>
-//                 <label>{this.state.NameForSale}</label>
-//               </div>
-//               <div className='form-group'>
-//                 <label>Description:&nbsp;&nbsp;</label>
-//                 <label>{this.state.DescriptionForSale}</label>
-//               </div>
-//               <div className="form-group">
-//                 <label>Price in ETH</label>
-//                 <input type="number" className="form-control" id="data_price" onChange={this.handleEventChange} placeholder="1" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" />
-//               </div>
-//             </Form>
-//           </Modal.Body>
-//           <Modal.Footer>
-//             <button className='btn btn-primary' type='submit' onClick={this.sellMyData}>Submit</button>
-//             <button className='btn btn-default' onClick={this.handleSellModalClose}>Close</button>
-//           </Modal.Footer>
-//         </Modal>
-
-//       </div>
-//     );
 
 return (
   <div>
@@ -857,7 +696,7 @@ return (
             <div className='panel-body'>{this.DataForSale(this.state.DataForSale)}</div>
           </div> */}
 
-          <table className="table table-bordered table-striped">
+          <table className="table table-striped">
           <thead>
             <tr>
               <th>Name</th>

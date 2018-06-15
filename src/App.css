@@ -746,6 +746,6 @@ td {
   overflow: hidden;
 }
 
-.can-not-buy td{
-  background-color: gray !important;
+.can-not-buy button{
+  display: none;
 }
