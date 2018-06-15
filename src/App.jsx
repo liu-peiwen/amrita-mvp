@@ -55,6 +55,8 @@ class App extends Component {
       DecryptedText:'',
       MarketImageCheck: true,
       MarketGenomicCheck: true,
+      ShowDataMarket: false,
+      ShowMainPage: true,
 
       dataForSale: [
         { Id: '1', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
@@ -179,7 +181,7 @@ class App extends Component {
             <td style={{textAlign:"center"}}>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image Data"}</td>
             <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;ETH</td>
             <td style={{textAlign:"center"}}>{data[0].Seller}</td>
-            <td style={{textAlign:"center"}} className={userOwnData}><button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button></td>
+            <td style={{textAlign:"center" ,width:"100px"}} className={userOwnData}><button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button></td>
           </tr>
         )
       }) : null
@@ -607,6 +609,9 @@ class App extends Component {
     let showUploadGenomic = 
     this.state.DataType === "1" ? "form-group" : "hide-upload-button";
 
+    let showMainPage = this.state.ShowMainPage ? '' : 'hide-content';
+    let showDataMarket = this.state.ShowDataMarket ? '' : 'hide-content';
+
 return (
   <div>
     <header>		
@@ -656,8 +661,8 @@ return (
     <div className="container">
       <div className="row" id="section-2">
 
-        <div className="col-md-3 sidebar">
-          <div className="btn btn-green text-center btn-lg" onClick={this.handleOpen}>Upload</div>
+        <div className="col-md-3">
+          <div className="btn text-center btn-lg upload-btn" onClick={this.handleOpen}>Upload</div>
           {/* <div className="box top-space-10">
             <div className="box-head">
               <h4 className="box-title">My Data 1</h4>
@@ -676,12 +681,13 @@ return (
 
               <div className="onClickTextOverImage-genomic" onClick={this.openGenomicData}>
                 <div className="text">
-                  Genomic Data
+                  Genetic Data
                 </div>
               </div>
         </div>
         </div>
 
+        <div className={showDataMarket}>
         <div className="col-md-9">
 
           {/* <div className="box top-space-20 text-center">
@@ -695,7 +701,27 @@ return (
             <div className='panel-head'>Market Data</div>
             <div className='panel-body'>{this.DataForSale(this.state.DataForSale)}</div>
           </div> */}
-
+          <div className='market-header'>
+            <div onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false})}>
+              <span><i className="fa fa-arrow-left" /></span>
+              <span>Back</span>
+            </div>
+            <div>
+            <span className='marketplace-label'>Data Marketplace</span>
+            </div>
+            <div>
+            <label style={{display: 'inline-flex', justifyContent: 'space-around'}}>
+              <label >
+              <label>Image:</label>
+               <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
+               </label>
+               <label >
+               <label>Gene:</label>
+               <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
+             </label>
+            </label>
+            </div>
+          </div>
           <table className="table table-striped">
           <thead>
             <tr>
@@ -705,16 +731,6 @@ return (
               <th>Price</th>
               <th>Seller</th>
               <th>
-              <label style={{display: 'flex', justifyContent: 'center'}}>
-              <label >
-              <label>Image:</label>
-               <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
-               </label>
-               <label >
-               <label>Genomic:</label>
-               <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
-             </label>
-             </label>
               </th>
             </tr>
           </thead>
@@ -722,6 +738,21 @@ return (
             {this.DataForSale(this.state.DataForSale)}
           </tbody>
         </table>
+        </div>
+        </div>
+
+       <div className={showMainPage}>
+        <div className="col-md-9 maincontent">
+					
+					<div className="box entrance entrance-data text-center">
+						<a onClick={() => this.setState({ShowMainPage: false, ShowDataMarket: true})} style={{color:'white'}}><h1>Data Market Place</h1></a>
+					</div>
+
+					<div className="box top-space-10 entrance entrance-al text-center">
+						<a onClick={() => this.setState({ShowMainPage: false, ShowDataMarket: true})} style={{color: 'white'}}><h1>Al Market Place</h1></a>
+					</div>
+				
+				</div>
         </div>
 
       </div>
@@ -732,37 +763,37 @@ return (
         <div className="col-sm-8">
           <div className="col-sm-4">
             <div className="text-center">
-              <h4>Lorem ipsum</h4>
+              <h4>Amrita Network</h4>
               <ul className="footer-menu">
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
               </ul>
             </div>
           </div>
           <div className="col-sm-4">
             <div className="text-center">
-              <h4>Lorem ipsum</h4>
+              <h4>Amrita Network</h4>
               <ul className="footer-menu">
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
               </ul>
             </div>
           </div>
           <div className="col-sm-4">
             <div className="text-center">
-              <h4>Lorem ipsum</h4>
+              <h4>Amrita Network</h4>
               <ul className="footer-menu">
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
               </ul>
             </div>
           </div>
@@ -770,8 +801,8 @@ return (
         <div className="col-sm-4 right-sidebar">
           <div className="col-sm-8 col-sm-offset-2">
             <div className="text-center">
-              <h4>Lorem ipsum</h4>
-              <p>A B C D</p>
+              <h4>Amrita Network</h4>
+              <p>Amrita MVP</p>
             </div>
           </div>
         </div>
