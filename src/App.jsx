@@ -271,7 +271,7 @@ class App extends Component {
       web3.utils.toWei(this.state.PriceForSell, "ether"),
       { from: this.state.account, gas: 5000000 }
     )
-    .then(this.setState({PutItOnMarket: false, OpenMyData: false}), this.refreshMarket());
+    .then(this.setState({PutItOnMarket: false, OpenMyData: false}));
     console.log("Finished!!!!!!!!");
   }
 
