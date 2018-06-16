@@ -702,25 +702,26 @@ return (
             <div className='panel-body'>{this.DataForSale(this.state.DataForSale)}</div>
           </div> */}
           <div className='market-header'>
-            <div onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false})}>
-              <span><i className="fa fa-arrow-left" /></span>
+            <div className="back-button" onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false})}>
+              <span><i className="fa fa-chevron-left fa-lg" /></span>
               <span>Back</span>
             </div>
+
             <div>
             <span className='marketplace-label'>Data Marketplace</span>
             </div>
-            <div>
-            <label style={{display: 'inline-flex', justifyContent: 'space-around'}}>
-              <label >
-              <label>Image:</label>
-               <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
-               </label>
-               <label >
-               <label>Gene:</label>
-               <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
-             </label>
-            </label>
+            
+            <div className='filter-check-box'>
+              <span>
+                  <label>Image:</label>
+                  <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
+              </span>
+              <span>
+                 <label>Gene:</label>
+                 <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
+              </span>
             </div>
+            
           </div>
           <table className="table table-striped">
           <thead>
@@ -749,7 +750,7 @@ return (
 					</div>
 
 					<div className="box top-space-10 entrance entrance-al text-center">
-						<a onClick={() => this.setState({ShowMainPage: false, ShowDataMarket: true})} style={{color: 'white'}}><h1>Al Market Place</h1></a>
+						<a style={{color: 'white'}}><h1>Al Market Place</h1></a>
 					</div>
 				
 				</div>

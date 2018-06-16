@@ -719,9 +719,8 @@ nav.navbar {
 table {
   /* table-layout: fixed;
   width: 50px; */
-  display: table;
-  margin: 8px auto;
-  border-radius: 4px;
+  max-width: 100% !important;
+  margin: 10px 0 !important;
 }
 
 td {
@@ -743,7 +742,7 @@ th {
 }
 
 .table-striped > tbody > tr:nth-child(2n+1) > td, .table-striped > tbody > tr:nth-child(2n+1) > th {
-  background-color: #23a7ff;
+  background-color: #87CEFA !important;
 }
 .table-striped > tbody > tr:nth-child(2n) > td, .table-striped > tbody > tr:nth-child(2n) > th {
   background-color: #ffffff;
@@ -788,3 +787,37 @@ th {
 .hide-content {
   display: none;
 }
+
+.back-button {
+  background-color: darkgray;
+  cursor: pointer;
+  padding: 8px 16px 4px 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+.back-button span:nth-child(1) {
+  display: block;
+  width: 15px;
+  margin: 0 auto;
+}
+
+.back-button span:nth-child(2) {
+  font-size: 16px;
+  margin-left: 4px;
+  display: block;
+}
+
+.filter-check-box {
+  background-color: darkgray;
+  padding: 4px 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.filter-check-box span:nth-child(1) {
+  display: block;
+}
+
+.filter-check-box span:nth-child(2) {
+  display: block;
+} 
