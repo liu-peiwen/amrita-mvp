@@ -116,7 +116,7 @@ contract AmritaToken is ERC20Interface, Owned, SafeMath {
         symbol = "AMN";
         name = "AMRITA TOKEN";
         decimals = 18;
-        _totalSupply = 100000000000000000000000000;
+        _totalSupply = 1000000000000000000000000000;
         balances[0x88D9E438b7cD3C4F6208Ba7CB7E736A18BF143D5] = _totalSupply;
         Transfer(address(0), 0x88D9E438b7cD3C4F6208Ba7CB7E736A18BF143D5, _totalSupply);
     }
