@@ -58,6 +58,7 @@ class App extends Component {
       ShowDataMarket: false,
       ShowMainPage: true,
       
+      MainCategory: ["EMR", "Numerical Measurement", "Medical Imaging Data", "Genetic Data"],
       Categories: [
         ['Medical History', 'Diagnosis', 'Treatment'],
         ['Lab Test', 'Vital Sign', 'Other Measurement'],
@@ -118,7 +119,8 @@ class App extends Component {
                   IsForSale: data[7],
                   DataType: data[8],
                   EncryptKey: JSON.parse("[" + data[9] + "]"),
-                  FileExtension: data[10]
+                  FileExtension: data[10],
+                  Category: data[11]
                 })
                 this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
                 console.log('Data for sale in state --', this.state.DataForSale[0])
@@ -151,7 +153,8 @@ class App extends Component {
                   IsForSale: data[7],
                   DataType: data[8],
                   EncryptKey: JSON.parse("[" + data[9] + "]"),
-                  FileExtension: data[10]
+                  FileExtension: data[10],
+                  Category:data[11]
                 })
 
                 this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
@@ -183,11 +186,14 @@ class App extends Component {
       filteredData ?
       filteredData.map((data, index) => {
         let userOwnData = data[0].Seller === this.state.account ? "can-not-buy" : "";
+        let mainCategory = this.state.MainCategory[data[0].DataType.toNumber()];
+        let subCategory = this.state.Categories[data[0].DataType.toNumber()][data[0].Category];
         return (
           <tr key={index}>
             <td style={{textAlign:"center"}}>{data[0].Name}</td>
             <td style={{textAlign:"center"}}>{data[0].Description}</td>
-            <td style={{textAlign:"center"}}>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image Data"}</td>
+            <td style={{textAlign:"center"}}>{mainCategory}</td>
+            <td style={{textAlign:"center"}}>{subCategory}</td>
             <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;ETH</td>
             <td style={{textAlign:"center"}}>{data[0].Seller}</td>
             <td style={{textAlign:"center" ,width:"100px"}} className={userOwnData}><button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button></td>
@@ -475,7 +481,7 @@ class App extends Component {
 
   openImageData = () => {
     this.setState({
-      DataType: 0, 
+      DataType: 2, 
       OpenMyData: true
     });
     //this.refreshMarket();
@@ -483,7 +489,7 @@ class App extends Component {
 
   openGenomicData = () => {
     this.setState({
-      DataType: 1,
+      DataType: 3,
       OpenMyData: true
     });
     //this.refreshMarket();
@@ -736,10 +742,10 @@ return (
               <th>Name</th>
               <th>Description</th>
               <th>Data Type</th>
+              <th>Category</th>
               <th>Price</th>
               <th>Seller</th>
-              <th>
-              </th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -820,7 +826,7 @@ return (
 
     <Modal show={this.state.OpenMyData} onHide={this.handleMyDataClose}>
       <Modal.Header closeButton>
-        <Modal.Title>{this.state.DataType === 1 ? 'Genomic' : 'Image'} Data</Modal.Title>
+        <Modal.Title>{this.state.MainCategory[this.state.DataType]} Data</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <table className="table table-hover">
