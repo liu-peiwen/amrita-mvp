@@ -579,11 +579,11 @@ class App extends Component {
       //return the transaction hash from the ethereum contract
       //see, this https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send
       console.log('State', this.state.Name, this.state.Description);
+      console.log("DataType:",this.state.DataType, "Category:",this.state.SelectCategory.toString());
+      console.log("ipfsHash:", this.state.ipfsHash)
+      console.log("EncryptKey:", this.state.EncryptKey.toString());
+      console.log("FileExtension:", this.state.FileExtension);
 
-      
-      console.log(this.state.SelectCategory);
-      console.log("=====web3 version", web3.version);
-      console.log("EncryptKey", this.state.EncryptKey);
       this.state.ContractInstance.uploadData(
         this.state.Name,
         this.state.Description,
