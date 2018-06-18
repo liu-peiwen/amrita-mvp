@@ -57,6 +57,15 @@ class App extends Component {
       MarketGenomicCheck: true,
       ShowDataMarket: false,
       ShowMainPage: true,
+      
+      Categories: [
+        ['Medical History', 'Diagnosis', 'Treatment'],
+        ['Lab Test', 'Vital Sign', 'Other Measurement'],
+        ['X-ray', 'CT', 'MRI', 'US'],
+        ['Sequence', 'Annotations', 'Quantitative', 'Read Alignments']
+      ],
+      Category: [],
+      SelectCategory: '',
 
       dataForSale: [
         { Id: '1', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
@@ -405,9 +414,9 @@ class App extends Component {
     const file = event.target.files[0]
     console.log('upload data type-------',this.state.DataType)
     let _validFileExtensions = [];
-    if(this.state.DataType === "0") {
+    if(this.state.DataType === "2") {
       _validFileExtensions = [".dcm", ".nii.gz", ".nii", ".img", ".doc"]
-    } else if(this.state.DataType === "1") {
+    } else if(this.state.DataType === "3") {
     _validFileExtensions = [".vcf", ".sam"];
     }
     var sFileName = event.target.value;
@@ -486,6 +495,12 @@ class App extends Component {
 
   handleSellModalClose = () => this.setState({ PutItOnMarket: false });
 
+  mapCategorySelection = (categories) => {
+    return (
+      categories.map((category, index) => <option value={index}>{category}</option>)
+    )
+  }
+
   onClick = async () => {
 
     try {
@@ -518,11 +533,13 @@ class App extends Component {
       this.setState({ PriceForSell: e.target.value });
     }
     if (e.target.id === 'data_type') { 
-      this.setState({DataType: e.target.value});
+      this.setState({DataType: e.target.value, Category: this.state.Categories[e.target.value]});
+    }
+    if (e.target.id === 'sub-category') {
+      this.setState({SelectCategory: e.target.value});
     }
     if (e.target.id === 'image-check') {
       this.setState({ImageCheck: !this.state.ImageCheck});
-
     }
     if (e.target.id === 'genomic-check') {
       this.setState({GenomicCheck: !this.state.GenomicCheck});
@@ -538,17 +555,6 @@ class App extends Component {
   onSubmit = async (event) => {
     event.preventDefault();
 
-    //bring in user's metamask account address
-    // const accounts = await web3.eth.getAccounts();
-
-    // console.log('Sending from Metamask account: ' + accounts[0]);
-
-    //obtain contract address from storehash.js
-    //const ethAddress = await storehash.options.address;
-    //this.setState({ ethAddress });
-
-    //save document to IPFS,return its hash#, and set hash# to state
-    //https://github.com/ipfs/interface-ipfs-core/blob/master/SPEC/FILES.md#add
     await ipfs.add(this.state.buffer, (err, ipfsHash) => {
       console.log(err, ipfsHash);
       //setState by setting ipfsHash to ipfsHash[0].hash
@@ -575,19 +581,20 @@ class App extends Component {
       console.log('State', this.state.Name, this.state.Description);
 
       
-      console.log(this.state.DataType);
+      console.log(this.state.SelectCategory);
       console.log("=====web3 version", web3.version);
       console.log("EncryptKey", this.state.EncryptKey);
       this.state.ContractInstance.uploadData(
         this.state.Name,
         this.state.Description,
         this.state.DataType,
+        this.state.SelectCategory.toString(),
         this.state.ipfsHash,
         this.state.EncryptKey.toString(),
         this.state.FileExtension,
         {
           from: this.state.account,
-          gas: 500000
+          gas: 5000000
         }).catch(err => console.log(err));
       this.setState({
         show: false,
@@ -605,9 +612,9 @@ class App extends Component {
       this.state.Name.length > 0 &&
       this.state.Description.length > 0;
     let showUploadImage = 
-      this.state.DataType === "0" ?  "form-group" : "hide-upload-button";
+      this.state.DataType === "2" ?  "form-group" : "hide-upload-button";
     let showUploadGenomic = 
-    this.state.DataType === "1" ? "form-group" : "hide-upload-button";
+    this.state.DataType === "3" ? "form-group" : "hide-upload-button";
 
     let showMainPage = this.state.ShowMainPage ? '' : 'hide-content';
     let showDataMarket = this.state.ShowDataMarket ? '' : 'hide-content';
@@ -850,8 +857,17 @@ return (
                 <label>Data Type</label>
                 <select className="form-control" id="data_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
                   <option value="" disabled selected>Please Select Upload Data Type</option>
-                  <option value="0">Image</option>
-                  <option value="1">Genomic</option>
+                  <option value="0">EMR</option>
+                  <option value="1">Numerical Measurement</option>
+                  <option value="2">Medical Imaging Data</option>
+                  <option value="3">Genetic Data</option>
+                </select>
+              </div>
+              <div className='form-group'>
+                <label>Category</label>
+                <select className="form-control" id="sub-category" onChange={this.handleEventChange} placeholder="Please select a category" required>
+                  <option value="" disabled selected>Please Select A Category</option>
+                  {this.mapCategorySelection(this.state.Category)}
                 </select>
               </div>
               <div className={showUploadImage}>
