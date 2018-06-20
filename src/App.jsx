@@ -57,6 +57,7 @@ class App extends Component {
       MarketGenomicCheck: true,
       ShowDataMarket: false,
       ShowMainPage: true,
+      ShowSubCategory: false,
       
       MainCategory: ["EMR", "Numerical Measurement", "Medical Imaging Data", "Genetic Data"],
       Categories: [
@@ -67,6 +68,7 @@ class App extends Component {
       ],
       Category: [],
       SelectCategory: '',
+      SubCategory: '',
 
       dataForSale: [
         { Id: '1', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
@@ -187,13 +189,13 @@ class App extends Component {
       filteredData.map((data, index) => {
         let userOwnData = data[0].Seller === this.state.account ? "can-not-buy" : "";
         let mainCategory = this.state.MainCategory[data[0].DataType.toNumber()];
-        let subCategory = this.state.Categories[data[0].DataType.toNumber()][data[0].Category];
+        let category = this.state.Categories[data[0].DataType.toNumber()][data[0].Category];
         return (
           <tr key={index}>
             <td style={{textAlign:"center"}}>{data[0].Name}</td>
             <td style={{textAlign:"center"}}>{data[0].Description}</td>
             <td style={{textAlign:"center"}}>{mainCategory}</td>
-            <td style={{textAlign:"center"}}>{subCategory}</td>
+            <td style={{textAlign:"center"}}>{category}</td>
             <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;ETH</td>
             <td style={{textAlign:"center"}}>{data[0].Seller}</td>
             <td style={{textAlign:"center" ,width:"100px"}} className={userOwnData}><button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button></td>
@@ -497,7 +499,7 @@ class App extends Component {
 
   handleMyDataClose = () => this.setState({OpenMyData: false, DataType: null});
 
-  handleClose = () => this.setState({show: false});
+  handleClose = () => this.setState({show: false, ShowSubCategory: false, DataType: ''});
 
   handleSellModalClose = () => this.setState({ PutItOnMarket: false });
 
@@ -540,9 +542,17 @@ class App extends Component {
     }
     if (e.target.id === 'data_type') { 
       this.setState({DataType: e.target.value, Category: this.state.Categories[e.target.value]});
+      if (e.target.value === '2') {
+        this.setState({ShowSubCategory: true});
+      } else {
+        this.setState({ShowSubCategory: false});
+      }
     }
-    if (e.target.id === 'sub-category') {
+    if (e.target.id === 'category') {
       this.setState({SelectCategory: e.target.value});
+    }
+    if (e.target.id === 'sub_category') {
+      this.setState({SubCategory: e.target.value});
     }
     if (e.target.id === 'image-check') {
       this.setState({ImageCheck: !this.state.ImageCheck});
@@ -624,6 +634,7 @@ class App extends Component {
 
     let showMainPage = this.state.ShowMainPage ? '' : 'hide-content';
     let showDataMarket = this.state.ShowDataMarket ? '' : 'hide-content';
+    let ShowSubCategory = this.state.ShowSubCategory ? '' : 'hide-content';
 
 return (
   <div>
@@ -860,6 +871,17 @@ return (
                 <textarea type="text" className='form-control vresize' id="data_description" onChange={this.handleEventChange} placeholder="Describe your article" maxLength="255" required></textarea>
               </div>
               <div className='form-group'>
+                <label>Storage Type</label>
+                <select className="form-control" id="storage_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
+                  <option value="" disabled selected>Please Select Storage Type</option>
+                  <option value="0">IPFS</option>
+                  <option value="1">StorJ</option>
+                  <option value="2">AWS</option>
+                  <option value="3">Google Cloud</option>
+                  <option value="4">Microsoft Azure</option>
+                </select>
+              </div>
+              <div className='form-group'>
                 <label>Data Type</label>
                 <select className="form-control" id="data_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
                   <option value="" disabled selected>Please Select Upload Data Type</option>
@@ -871,9 +893,21 @@ return (
               </div>
               <div className='form-group'>
                 <label>Category</label>
-                <select className="form-control" id="sub-category" onChange={this.handleEventChange} placeholder="Please select a category" required>
+                <select className="form-control" id="category" onChange={this.handleEventChange} placeholder="Please select a category" required>
                   <option value="" disabled selected>Please Select A Category</option>
                   {this.mapCategorySelection(this.state.Category)}
+                </select>
+              </div>
+              <div className={`form-group ${ShowSubCategory}`}>
+                <label>SubCategory</label>
+                <select className="form-control" id="sub_category" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
+                  <option value="" disabled selected>Please Select A SubCategory</option>
+                  <option value="0">Brain</option>
+                  <option value="1">Head and Neck</option>
+                  <option value="2">Chest</option>
+                  <option value="3">Heart</option>
+                  <option value="4">Abdomen</option>
+                  <option value="5">Extremities and Joint</option>
                 </select>
               </div>
               <div className={showUploadImage}>
