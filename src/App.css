@@ -820,4 +820,12 @@ th {
 
 .filter-check-box span:nth-child(2) {
   display: block;
-} 
+}
+
+.checked {
+  color: orange;
+}
+
+.checkbox-label-spacing {
+  margin-left: 8px;
+}

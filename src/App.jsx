@@ -68,7 +68,16 @@ class App extends Component {
       ],
       Category: [],
       SelectCategory: '',
-      SubCategory: '',
+
+      SubCategory: {
+        BrainCheck: false,
+        HeadCheck: false,
+        ChestCheck: false,
+        HeartCheck: false,
+        AbdomenCheck: false,
+        ExtremitiesCheck: false,
+      },
+      SelectSubCategory: '',
 
       dataForSale: [
         { Id: '1', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
@@ -198,6 +207,13 @@ class App extends Component {
             <td style={{textAlign:"center"}}>{category}</td>
             <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;ETH</td>
             <td style={{textAlign:"center"}}>{data[0].Seller}</td>
+            <td style={{textAlign:"center"}}>
+              <span className="fa fa-star checked"></span>
+              <span className="fa fa-star checked"></span>
+              <span className="fa fa-star checked"></span>
+              <span className="fa fa-star checked"></span>
+              <span className="fa fa-star checked"></span>
+            </td>
             <td style={{textAlign:"center" ,width:"100px"}} className={userOwnData}><button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button></td>
           </tr>
         )
@@ -531,6 +547,7 @@ class App extends Component {
   } //onClick
 
   handleEventChange = (e) => {
+    const {BrainCheck, HeadCheck, ChestCheck, HeartCheck, AbdomenCheck, ExtremitiesCheck} = this.state.SubCategory;
     if (e.target.id === 'data_name') {
       this.setState({ Name: e.target.value });
     }
@@ -566,10 +583,65 @@ class App extends Component {
     if (e.target.id === 'market-genomic-check') {
       this.setState({MarketGenomicCheck: !this.state.MarketGenomicCheck});
     }
+    if (e.target.id === 'head-check') {
+      this.setState({SubCategory: {...this.state.SubCategory, HeadCheck: !HeadCheck}});
+    }
+    if (e.target.id === 'brain-check') {
+      this.setState({SubCategory: {...this.state.SubCategory, BrainCheck: !BrainCheck}});
+    }
+    if (e.target.id === 'chest-check') {
+      this.setState({SubCategory: {...this.state.SubCategory, ChestCheck: !ChestCheck}});
+    }
+    if (e.target.id === 'heart-check') {
+      this.setState({SubCategory: {...this.state.SubCategory, HeartCheck: !HeartCheck}});
+    }
+    if (e.target.id === 'abdomen-check') {
+      this.setState({SubCategory: {...this.state.SubCategory, AbdomenCheck: !AbdomenCheck}});
+    }
+    if (e.target.id === 'extremities-check') {
+      this.setState({SubCategory: {...this.state.SubCategory, ExtremitiesCheck: !ExtremitiesCheck}});
+    }
+  }
+
+  convertSubCategoryToString = () => {
+    const {SubCategory} = this.state;
+    let selectSubCategory =[];
+
+    for (let key in SubCategory) {
+      if (SubCategory.hasOwnProperty(key)) {
+        if (SubCategory[key] === true) {
+          switch(key) {
+            case 'BrainCheck':
+              selectSubCategory.push('Brain');
+              break;
+            case 'HeartCheck':
+              selectSubCategory.push('Heart');
+              break;
+            case 'HeadCheck':
+              selectSubCategory.push('Head and Neck');
+              break;
+            case 'ChestCheck':
+              selectSubCategory.push('Chest');
+              break;
+            case 'AbdomenCheck':
+              selectSubCategory.push('Abdomen');
+              break;
+            case 'ExtremitiesCheck':
+              selectSubCategory.push('Extremities and Joints');
+              break;
+            default:
+              selectSubCategory.push('');
+          }         
+        }
+      }
+    }
+    this.setState({SelectSubCategory: selectSubCategory.join()})
   }
 
   onSubmit = async (event) => {
     event.preventDefault();
+    this.convertSubCategoryToString();
+    console.log("SelectSubCategory:", this.state.SelectSubCategory);
 
     await ipfs.add(this.state.buffer, (err, ipfsHash) => {
       console.log(err, ipfsHash);
@@ -636,6 +708,7 @@ class App extends Component {
     let showDataMarket = this.state.ShowDataMarket ? '' : 'hide-content';
     let ShowSubCategory = this.state.ShowSubCategory ? '' : 'hide-content';
 
+    const {BrainCheck, HeadCheck, ChestCheck, HeartCheck, AbdomenCheck, ExtremitiesCheck} = this.state.SubCategory;
 return (
   <div>
     <header>		
@@ -756,6 +829,7 @@ return (
               <th>Category</th>
               <th>Price</th>
               <th>Seller</th>
+              <th>Rating</th>
               <th></th>
             </tr>
           </thead>
@@ -900,7 +974,7 @@ return (
               </div>
               <div className={`form-group ${ShowSubCategory}`}>
                 <label>SubCategory</label>
-                <select className="form-control" id="sub_category" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
+                {/* <select className="form-control" id="sub_category" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
                   <option value="" disabled selected>Please Select A SubCategory</option>
                   <option value="0">Brain</option>
                   <option value="1">Head and Neck</option>
@@ -908,7 +982,31 @@ return (
                   <option value="3">Heart</option>
                   <option value="4">Abdomen</option>
                   <option value="5">Extremities and Joint</option>
-                </select>
+                </select> */}
+                <div>
+                  <input type="checkbox" id="brain-check" checked={BrainCheck} onChange={this.handleEventChange} />
+                  <label className="checkbox-label-spacing">Brain</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="head-check" checked={HeadCheck} onChange={this.handleEventChange} />
+                  <label className="checkbox-label-spacing">Head and Neck</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="chest-check" checked={ChestCheck} onChange={this.handleEventChange} />
+                  <label className="checkbox-label-spacing">Chest</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="heart-check" checked={HeartCheck} onChange={this.handleEventChange} />
+                  <label className="checkbox-label-spacing">Heart</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="abdomen-check" checked={AbdomenCheck} onChange={this.handleEventChange} />
+                  <label className="checkbox-label-spacing">Abdomen</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="extremities-check" checked={ExtremitiesCheck} onChange={this.handleEventChange} />
+                  <label className="checkbox-label-spacing">Extremities and Joints</label>
+                </div>
               </div>
               <div className={showUploadImage}>
                 <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")} required/>
