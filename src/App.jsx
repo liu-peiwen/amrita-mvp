@@ -232,6 +232,7 @@ class App extends Component {
             <td style={{textAlign:"center"}}>{data[0].Description}</td>
             <td style={{textAlign:"center"}}>{data[0].IpfsAddress}</td>
             <td style={{textAlign:"center"}}>
+            <div>Details</div>
             <button className='btn btn-primary' onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</button>
             </td>
           </tr>
@@ -760,27 +761,45 @@ return (
 
         <div className="col-md-3">
           <div className="btn text-center btn-lg upload-btn" onClick={this.handleOpen}>Upload</div>
-          {/* <div className="box top-space-10">
-            <div className="box-head">
-              <h4 className="box-title">My Data 1</h4>
-            </div>
-            <div className="box-body">
-              <p className="color-green">Address <button className="btn btn-primary btn-small pull-right">SELL</button></p>
-              <p className="top-space-10">QWERTYUIOPSDFGHJKLVBNMHGJKLASDASD</p>
-            </div>
-          </div> */}
+          
           <div className="top-space-10">
-            <div className="onClickTextOverImage-image" onClick={this.openImageData}>
+
+          <div className="parent-image" onClick={this.openImageData}>
+		        <div className="child-image bg-one overlay">
+			         <a className="image-name"> Imaging Data</a>
+		        </div>
+	        </div>
+
+          <div className="parent-image" onClick={this.openGenomicData}>
+		        <div className="child-image bg-two">
+			         <a className="image-name">Genetic Data</a>
+		        </div>
+	        </div>
+
+          <div className="parent-image" onClick={this.openGenomicData}>
+		        <div className="child-image bg-three">
+			         <a className="image-name">EMR</a>
+		        </div>
+	        </div>
+
+          <div className="parent-image" onClick={this.openGenomicData}>
+		        <div className="child-image bg-four">
+			         <a className="image-name">Numerical Measurement</a>
+		        </div>
+	        </div>
+
+              {/* <div className="onClickTextOverImage-image" onClick={this.openImageData}>
                 <div className="text">
-                  Image Data
+                   <a>Image Data</a>
                 </div>
             </div>
 
               <div className="onClickTextOverImage-genomic" onClick={this.openGenomicData}>
                 <div className="text">
-                  Genetic Data
+                   <a>Genetic Data</a>
                 </div>
-              </div>
+              </div> */}
+
         </div>
         </div>
 
@@ -842,15 +861,18 @@ return (
 
        <div className={showMainPage}>
         <div className="col-md-9 maincontent">
-					
-					<div className="box entrance entrance-data text-center">
-						<a onClick={() => this.setState({ShowMainPage: false, ShowDataMarket: true})} style={{color:'white'}}><h1>Data Market Place</h1></a>
-					</div>
 
-					<div className="box top-space-10 entrance entrance-al text-center">
-						<a style={{color: 'white'}}><h1>Al Market Place</h1></a>
+				<div className="entrance-image-container">
+					<div className="box entrance entrance-data text-center">
+						<a onClick={() => this.setState({ShowMainPage: false, ShowDataMarket: true})} style={{color:'white'}}><h1>Data Marketplace</h1></a>
 					</div>
-				
+        </div>
+
+        <div className="entrance-image-container">
+					<div className="box top-space-10 entrance entrance-al text-center">
+						<a style={{color: 'white'}}><h1>AI Marketplace</h1></a>
+					</div>
+				</div>
 				</div>
         </div>
 

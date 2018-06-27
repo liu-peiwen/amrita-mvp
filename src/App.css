@@ -486,9 +486,22 @@ nav.navbar {
   width: 100%;
   border-radius: 1px;
 }
+
 #section-2 .maincontent .box {
-  height: 350px;
+  height: 440px;
+  margin-top: 0 !important;
+}
+#section-2 .maincontent .entrance-image-container {
+  width: 100%;
+  height: 100%;
   overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  margin-bottom: 30px;
+}
+#section-2 .maincontent .box.entrance-data:hover {
+  transform: scale(1.2);
+  transition: all 0.5s ease-out;
 }
 #section-2 .maincontent .box.entrance-data {
   background: url('./images/2.png');
@@ -498,7 +511,7 @@ nav.navbar {
   height: 100%;
   color: white;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
-  padding-top: 14%;
+  padding-top: 20%;
   transition: all 0.5s ease-out;
 }
 #section-2 .maincontent .box.entrance h1:hover {
@@ -509,6 +522,10 @@ nav.navbar {
 #section-2 .maincontent .box.entrance-al {
   background: url('./images/1.png');
   background-size: cover;
+}
+#section-2 .maincontent .box.entrance-al:hover {
+  transform: scale(1.2);
+  transition: all 0.5s ease-out;
 }
 #box-1 {
   height: 150px;
@@ -667,15 +684,18 @@ nav.navbar {
 }
 
 .onClickTextOverImage-image{
-  width:200px;
-  height:200px;
+  width: 200px;
+  height: 200px;
   background-size:cover;
+  background-repeat: no-repeat;
   display: table;
   margin: 10px auto;
-  border-radius:16px;
-  box-shadow:0 0 16px rgba(0,0,0,0.5);
+  border-radius: 16px;
+  box-shadow: 0 0 16px rgba(0,0,0,0.5);
   position:relative;
+  overflow: hidden;
   background-image: url('./images/image.png');
+  transition: all .5s;
 }
 
 .onClickTextOverImage-genomic{
@@ -828,4 +848,95 @@ th {
 
 .checkbox-label-spacing {
   margin-left: 8px;
+}
+
+/* Image zoom on hover + Overlay colour */
+.parent-image {
+  width: 200px;
+  margin: 15px auto;
+  height: 200px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  display: table;
+}
+
+.child-image {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  opacity: 0.8;
+  border-radius: 16px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  -webkit-transition: all .5s;
+  -moz-transition: all .5s;
+  -o-transition: all .5s;
+  transition: all .5s;
+}
+.bg-one {
+  background-image: url('./images/Medical-Imaging-Data.png');
+  background-color:rgba(0,0,0,0.2) !important;
+}
+.bg-two {background-image: url('./images/Genetic-Data.png');}
+.bg-three {background-image: url('./images/EMR.png');}
+.bg-four {background-image: url('./images/Numerical-Measurement.png');}
+
+.image-name {
+  font-size: 20px;
+  color: #ffffff !important;
+  font-family: sans-serif;
+  text-align: center;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  height: 50px;
+  cursor: pointer;
+  text-decoration: none;
+  z-index: 1;
+}
+
+.parent-image:hover .child-image, .parent-image:focus .child-image {
+  -ms-transform: scale(1.2);
+  -moz-transform: scale(1.2);
+  -webkit-transform: scale(1.2);
+  -o-transform: scale(1.2);
+  transform: scale(1.2);
+}
+
+.parent-image:hover .child-image:before, .parent-image:focus .child-image:before {
+  display: block;
+}
+.parent-image:hover .child-image:after, .parent-image:focus .child-image:after {
+  display: none;
+}
+
+.parent-image:hover a, .parent-image:focus a {
+  display: block;
+}
+
+.child-image:before {
+  content: "";
+  display: none;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color:rgba(0,0,0,0.6) !important;
+}
+
+.child-image:after {
+  content: "";
+  display: block;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color:rgba(0,0,0,0.3);
 }
