@@ -58,6 +58,22 @@ class App extends Component {
       ShowDataMarket: false,
       ShowMainPage: true,
       ShowSubCategory: false,
+
+      NameForDetail: '',
+      CategoryForDetail: '',
+      SubCategoryForDetail: '',
+      DataTypeForDetail: '',
+      PriceForDetail: '',
+      SellerForDetail: '',
+      DescriptionForDetail: '',
+      ShowDetails: false,
+
+      MyNameDetail: '',
+      MyCategoryDetail: '',
+      MySubCategoryDetail: '',
+      MyDataTypeDetail: '',
+      MyDescriptionDetail: '',
+      ShowMyDetails: false,
       
       MainCategory: ["EMR", "Numerical Measurement", "Medical Imaging Data", "Genetic Data"],
       Categories: [
@@ -79,14 +95,17 @@ class App extends Component {
       },
       SelectSubCategory: '',
 
-      dataForSale: [
-        { Id: '1', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
-        { Id: '2', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
-        { Id: '3', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
-        { Id: '4', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
-        { Id: '5', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' }
+      mockDataForSale: [
+        {
+          NameForDetail: 'Image Data',
+          CategoryForDetail: 'Image',
+          SubCategoryForDetail: 'CT',
+          DataTypeForDetail: 'Image data',
+          PriceForDetail: '1 ETH',
+          Seller: '0Xdfhjksahjkgjhgdahkjhkjdsasfsfdsfgsdfgsf',
+          DescriptionForDetail: 'head and neck scan',
+        },
       ],
-
       DataForSale: [],
       AllMyData: [],
       show: false
@@ -174,7 +193,6 @@ class App extends Component {
             });
           }
         })
-
       })
     })
   }
@@ -214,7 +232,10 @@ class App extends Component {
               <span className="fa fa-star checked"></span>
               <span className="fa fa-star checked"></span>
             </td>
-            <td style={{textAlign:"center" ,width:"100px"}} className={userOwnData}><button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button></td>
+            <td style={{textAlign: "center" ,width: "100px"}} className={userOwnData}>
+              <a onClick={() => this.openDetailModal(index)}>Show Details</a>
+              <button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button>
+            </td>
           </tr>
         )
       }) : null
@@ -232,7 +253,7 @@ class App extends Component {
             <td style={{textAlign:"center"}}>{data[0].Description}</td>
             <td style={{textAlign:"center"}}>{data[0].IpfsAddress}</td>
             <td style={{textAlign:"center"}}>
-            <div>Details</div>
+            <a onClick={() => this.openMyDataDetailsModal(index)}>Details</a>
             <button className='btn btn-primary' onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</button>
             </td>
           </tr>
@@ -251,9 +272,50 @@ class App extends Component {
     })
   }
 
+  openMyDataDetailsModal = (i) => {
+    const {
+      Name,
+      Category,
+      SubCategory,
+      DataType,
+      Description
+    } = this.state.AllMyData[i][0];
+    
+    this.setState({
+      MyNameDetail: Name,
+      MyCategoryDetail: Category,
+      MySubCategoryDetail: SubCategory,
+      MyDataTypeDetail: DataType,
+      MyDescriptionDetail: Description,
+      ShowMyDetails: true
+    });
+  }
+
+  openDetailModal = (i) => {
+    const {
+      Name,
+      Category,
+      SubCategory,
+      DataType,
+      Price,
+      Seller,
+      Description
+    } = this.state.DataForSale[i][0];
+
+    this.setState({
+      NameForDetail: Name,
+      CategoryForDetail: Category,
+      SubCategoryForDetail: SubCategory,
+      DataTypeForDetail: DataType,
+      PriceForDetail: Price,
+      SellerForDetail: Seller,
+      DescriptionForDetail: Description,
+      ShowDetails: true
+    })
+  }
+
    
   decryptData = (data, key) => {
-    //console.log("PASS IN DATA---", data.toString('hex'));
     // When ready to decrypt the hex string, convert it back to bytes
     console.log("encryptedIPFS",data)
     let encryptedBytes = aesjs.utils.hex.toBytes(data);
@@ -266,16 +328,9 @@ class App extends Component {
     // Convert our bytes back into text
     let decryptedText = aesjs.utils.utf8.fromBytes(decryptedBytes);
     console.log("Decrypted------", decryptedText);
-    this.setState({DecryptedText: decryptedText})
-    //this.setState({FileExtension: this.state.DataForSale[index][0].FileExtension});
-    //console.log("filename=====", `test.${this.state.FileExtension}`);
 
-    // window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
-    // window.requestFileSystem(window.TEMPORARY, 1024*1024, this.onInitFs, err => err);
-    //fs.writeFile("test.text", '1234124', err => err ? console.log(err) : null);
-    //fs.writeFile(`.../downloads/test.${this.state.FileExtension}`, this.state.DecryptedText, err => err ? console.log(err) : null);
+    this.setState({DecryptedText: decryptedText})
     window.open(`https://ipfs.io/ipfs/${this.state.DecryptedText}`)
-    console.log("DONE!!!");
   }
 
   buyMarketData = async(index) => {
@@ -296,143 +351,15 @@ class App extends Component {
 
   sellMyData = () => {
 
-    //console.log('TYPE OF SELLING PRICE--', web3.toBigNumber(web3.utils.toWei(this.state.PriceForSell.toString(), "ether")));
     console.log('TYPE OF SELLING ID--', this.state.IdForSale);
-    console.log(this.state.ContractInstance);
 
     this.state.ContractInstance.sellData(
       this.state.IdForSale,
       web3.utils.toWei(this.state.PriceForSell, "ether"),
       { from: this.state.account, gas: 5000000 }
-    )
-    .then(this.setState({PutItOnMarket: false, OpenMyData: false}));
-    console.log("Finished!!!!!!!!");
+    ).then(this.setState({PutItOnMarket: false, OpenMyData: false}));
   }
-
-  refreshMarket = () => {
-    //Display all market data
-    this.state.ContractInstance.getDataForSale().then((dataIdList) => {
-      console.log('All Market Data ID List --', dataIdList);
-      this.setState({DataForSale: ''});
-      for (let i = 0; i < dataIdList.length; i++) {
-        var dataId = dataIdList[i];
-        this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
-          if (data[7] === true || data[7] === null) {
-            console.log("!!!!", data);
-            const dataForSale = [];
-            dataForSale.push({
-              Id: data[0],
-              Seller: data[1],
-              Buyer: data[2],
-              Name: data[3],
-              Description: data[4],
-              Price: web3.utils.fromWei(data[5].toString(), "ether"),
-              IsForSale: data[7],
-              DataType: data[8]
-            })
-            this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
-            console.log('Data for sale in state --', this.state.DataForSale[0])
-          }
-        });
-      }
-    })
-
-    //Display ALL My Data
-    this.state.ContractInstance.getDataForSale().then((dataIdList) => {
-      this.setState({AllMyData: ''});
-      for (let i = 0; i < dataIdList.length; i++) {
-        var dataId = dataIdList[i];
-
-        this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
-
-          if (data[1] === this.state.account) {
-            console.log("My data --", data);
-            const allMyData = [];
-            allMyData.push({
-              Id: data[0],
-              Seller: data[1],
-              Buyer: data[2],
-              Name: data[3],
-              Description: data[4],
-              Price: web3.utils.fromWei(data[5].toString(), "ether"),
-              IpfsAddress: data[6],
-              IsForSale: data[7],
-              DataType: data[8]
-            })
-
-            this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
-            console.log('All My Data in state --', this.state.AllMyData);
-          }
-        });
-      }
-    })
-
-  }
-
-  errorHandling = (err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      //Display all market data
-      this.state.ContractInstance.getDataForSale().then((dataIdList) => {
-        console.log('All Market Data ID List --', dataIdList);
-
-        for (let i = 0; i < dataIdList.length; i++) {
-          var dataId = dataIdList[i];
-          this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
-            if (data[7] === true || data[7] === null) {
-              console.log("!!!!", data);
-              const dataForSale = [];
-              dataForSale.push({
-                Id: data[0],
-                Seller: data[1],
-                Buyer: data[2],
-                Name: data[3],
-                Description: data[4],
-                Price: web3.utils.fromWei(data[5].toString(), "ether"),
-                IsForSale: data[7],
-                DataType: data[8]
-              })
-              this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
-              console.log('Data for sale in state --', this.state.DataForSale[0])
-            }
-          });
-        }
-      })
-
-      //Display ALL My Data
-      this.state.ContractInstance.getDataForSale().then((dataIdList) => {
-
-        for (let i = 0; i < dataIdList.length; i++) {
-          var dataId = dataIdList[i];
-
-          this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
-
-            if (data[1] === this.state.account) {
-              console.log("My data --", data);
-              const allMyData = [];
-              allMyData.push({
-                Id: data[0],
-                Seller: data[1],
-                Buyer: data[2],
-                Name: data[3],
-                Description: data[4],
-                Price: web3.utils.fromWei(data[5].toString(), "ether"),
-                IpfsAddress: data[6],
-                IsForSale: data[7],
-                DataType: data[8]
-              })
-
-              this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
-              console.log('All My Data in state --', this.state.AllMyData);
-            }
-          });
-        }
-      })
-
-    }
-  }
-
+  
   captureFile = (event) => {
     event.stopPropagation()
     event.preventDefault()
@@ -503,7 +430,6 @@ class App extends Component {
       DataType: 2, 
       OpenMyData: true
     });
-    //this.refreshMarket();
   };
 
   openGenomicData = () => {
@@ -511,12 +437,15 @@ class App extends Component {
       DataType: 3,
       OpenMyData: true
     });
-    //this.refreshMarket();
   };
 
   handleMyDataClose = () => this.setState({OpenMyData: false, DataType: null});
 
   handleClose = () => this.setState({show: false, ShowSubCategory: false, DataType: ''});
+
+  handleDetailModalClose = () => this.setState({ShowDetails: false});
+
+  handleMyDetailModalClose = () => this.setState({ShowMyDetails: false});
 
   handleSellModalClose = () => this.setState({ PutItOnMarket: false });
 
@@ -1068,6 +997,81 @@ return (
             <button className='btn btn-primary' type='submit' onClick={this.sellMyData}>Submit</button>
             <button className='btn btn-default' onClick={this.handleSellModalClose}>Close</button>
           </Modal.Footer>
+        </Modal>
+
+        <Modal show={this.state.ShowDetails} onHide={this.handleDetailModalClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Details</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <div className='form-group'>
+                <label>Name:&nbsp;&nbsp;</label>
+                <label>{this.state.NameForDetail}</label>
+              </div>
+              <div className='form-group'>
+                <label>Data Type:&nbsp;&nbsp;</label>
+                <label>{this.state.DataTypeForDetail}</label>
+              </div>
+              <div className='form-group'>
+                <label>Category:&nbsp;&nbsp;</label>
+                <label>{this.state.CategoryForDetail}</label>
+              </div>
+              <div className='form-group'>
+                <label>Sub Category:&nbsp;&nbsp;</label>
+                <label>{this.state.SubCategoryForDetail}</label>
+              </div>
+              <div className='form-group'>
+                <label>Price:&nbsp;&nbsp;</label>
+                <label>{this.state.PriceForDetail}</label>
+              </div>
+              <div className='form-group'>
+                <label>Seller:&nbsp;&nbsp;</label>
+                <label>{this.state.SellerForDetail}</label>
+              </div>
+              <div className='form-group'>
+                <label>Rating:&nbsp;&nbsp;</label>
+                <label></label>
+              </div>
+              <div className='form-group'>
+                <label>Description:&nbsp;&nbsp;</label>
+                <label>{this.state.DescriptionForDetail}</label>
+              </div>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <button className='btn btn-default' onClick={this.handleSellModalClose}>Close</button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={this.state.ShowMyDetails} onHide={this.handleMyDetailModalClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Details</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <div className='form-group'>
+                <label>Name:&nbsp;&nbsp;</label>
+                <label>{this.state.MyNameDetail}</label>
+              </div>
+              <div className='form-group'>
+                <label>Data Type:&nbsp;&nbsp;</label>
+                <label>{this.state.MyDataTypeDetail}</label>
+              </div>
+              <div className='form-group'>
+                <label>Category:&nbsp;&nbsp;</label>
+                <label>{this.state.MyCategoryDetail}</label>
+              </div>
+              <div className='form-group'>
+                <label>Sub Category:&nbsp;&nbsp;</label>
+                <label>{this.state.MySubCategoryDetail}</label>
+              </div>
+              <div className='form-group'>
+                <label>Description:&nbsp;&nbsp;</label>
+                <label>{this.state.MyDescriptionDetail}</label>
+              </div>
+            </Form>
+          </Modal.Body> 
         </Modal>
     </div>
     )
