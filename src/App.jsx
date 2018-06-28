@@ -55,6 +55,29 @@ class App extends Component {
       DecryptedText:'',
       MarketImageCheck: true,
       MarketGenomicCheck: true,
+      ShowDataMarket: false,
+      ShowMainPage: true,
+      ShowSubCategory: false,
+      
+      MainCategory: ["EMR", "Numerical Measurement", "Medical Imaging Data", "Genetic Data"],
+      Categories: [
+        ['Medical History', 'Diagnosis', 'Treatment'],
+        ['Lab Test', 'Vital Sign', 'Other Measurement'],
+        ['X-ray', 'CT', 'MRI', 'US'],
+        ['Sequence', 'Annotations', 'Quantitative', 'Read Alignments']
+      ],
+      Category: [],
+      SelectCategory: '',
+
+      SubCategory: {
+        BrainCheck: false,
+        HeadCheck: false,
+        ChestCheck: false,
+        HeartCheck: false,
+        AbdomenCheck: false,
+        ExtremitiesCheck: false,
+      },
+      SelectSubCategory: '',
 
       dataForSale: [
         { Id: '1', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
@@ -107,7 +130,8 @@ class App extends Component {
                   IsForSale: data[7],
                   DataType: data[8],
                   EncryptKey: JSON.parse("[" + data[9] + "]"),
-                  FileExtension: data[10]
+                  FileExtension: data[10],
+                  Category: data[11]
                 })
                 this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
                 console.log('Data for sale in state --', this.state.DataForSale[0])
@@ -140,7 +164,8 @@ class App extends Component {
                   IsForSale: data[7],
                   DataType: data[8],
                   EncryptKey: JSON.parse("[" + data[9] + "]"),
-                  FileExtension: data[10]
+                  FileExtension: data[10],
+                  Category:data[11]
                 })
 
                 this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
@@ -169,53 +194,32 @@ class App extends Component {
       filteredData = dataforsale;
     }
     return (
+      filteredData ?
       filteredData.map((data, index) => {
         let userOwnData = data[0].Seller === this.state.account ? "can-not-buy" : "";
+        let mainCategory = this.state.MainCategory[data[0].DataType.toNumber()];
+        let category = this.state.Categories[data[0].DataType.toNumber()][data[0].Category];
         return (
-          <tr key={index} className={userOwnData}>
+          <tr key={index}>
             <td style={{textAlign:"center"}}>{data[0].Name}</td>
             <td style={{textAlign:"center"}}>{data[0].Description}</td>
-            <td style={{textAlign:"center"}}>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image Data"}</td>
+            <td style={{textAlign:"center"}}>{mainCategory}</td>
+            <td style={{textAlign:"center"}}>{category}</td>
             <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;ETH</td>
             <td style={{textAlign:"center"}}>{data[0].Seller}</td>
-            <td style={{textAlign:"center"}}><button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button></td>
+            <td style={{textAlign:"center"}}>
+              <span className="fa fa-star checked"></span>
+              <span className="fa fa-star checked"></span>
+              <span className="fa fa-star checked"></span>
+              <span className="fa fa-star checked"></span>
+              <span className="fa fa-star checked"></span>
+            </td>
+            <td style={{textAlign:"center" ,width:"100px"}} className={userOwnData}><button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button></td>
           </tr>
         )
-      })
+      }) : null
     )
   }
-
-  // AllMyData = (allmydata) => {
-  //   let filteredData = allmydata;
-  //   if (this.state.ImageCheck === true && this.state.GenomicCheck === false) {
-  //     filteredData = allmydata.filter(data => data[0].DataType.toNumber() === 0);
-  //   }
-  //   if (this.state.ImageCheck === false && this.state.GenomicCheck === true) {
-  //     filteredData = allmydata.filter(data => data[0].DataType.toNumber() === 1);
-  //   }
-  //   if (this.state.ImageCheck === false && this.state.GenomicCheck === false) {
-  //     filteredData = [];
-  //   }
-  //   if (this.state.ImageCheck === true && this.state.GenomicCheck === true) {
-  //     filteredData = allmydata;
-  //   }
-  //   console.log(allmydata);
-  //   return (
-  //     filteredData.map((data, index) => {
-  //       return (
-  //         <div key={index} className='my-data-list'>
-  //           <Jumbotron>
-  //           <div className='my-data-list-item'>{data[0].Name}</div>
-  //           <div className='my-data-list-item'>{data[0].Description}</div>
-  //           <div className='my-data-list-item'>{data[0].IpfsAddress}</div>
-  //           <div className='my-data-list-item'>{(data[0].DataType.toNumber()) ? "Genomic Data" : "Image Data"}</div>
-  //           <button className='btn btn-primary' onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</button>
-  //           </Jumbotron>
-  //         </div>
-  //       )
-  //     })
-  //   )
-  // }
 
   AllMyData = (allmydata, isImageData) => {
     let filteredData;
@@ -228,6 +232,7 @@ class App extends Component {
             <td style={{textAlign:"center"}}>{data[0].Description}</td>
             <td style={{textAlign:"center"}}>{data[0].IpfsAddress}</td>
             <td style={{textAlign:"center"}}>
+            <div>Details</div>
             <button className='btn btn-primary' onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</button>
             </td>
           </tr>
@@ -246,33 +251,7 @@ class App extends Component {
     })
   }
 
-   onInitFs = (fs) => {
-
-  fs.root.getFile('/Users/Lee/Desktop/log.txt', {create: true}, function(fileEntry) {
-
-    // Create a FileWriter object for our FileEntry (log.txt).
-    fileEntry.createWriter(function(fileWriter) {
-
-      fileWriter.onwriteend = function(e) {
-        console.log('Write completed.');
-      };
-
-      fileWriter.onerror = function(e) {
-        console.log('Write failed: ' + e.toString());
-      };
-
-      // Create a new Blob and write it to log.txt.
-      var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
-
-      fileWriter.write(blob);
-
-    }, err => err);
-
-  }, err => err);
-
-}
-
-
+   
   decryptData = (data, key) => {
     //console.log("PASS IN DATA---", data.toString('hex'));
     // When ready to decrypt the hex string, convert it back to bytes
@@ -326,17 +305,15 @@ class App extends Component {
       web3.utils.toWei(this.state.PriceForSell, "ether"),
       { from: this.state.account, gas: 5000000 }
     )
-    .then(this.refreshMarket(),this.setState({PutItOnMarket: false}))
-    
-    
-    
+    .then(this.setState({PutItOnMarket: false, OpenMyData: false}));
+    console.log("Finished!!!!!!!!");
   }
 
   refreshMarket = () => {
     //Display all market data
     this.state.ContractInstance.getDataForSale().then((dataIdList) => {
       console.log('All Market Data ID List --', dataIdList);
-
+      this.setState({DataForSale: ''});
       for (let i = 0; i < dataIdList.length; i++) {
         var dataId = dataIdList[i];
         this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
@@ -362,7 +339,7 @@ class App extends Component {
 
     //Display ALL My Data
     this.state.ContractInstance.getDataForSale().then((dataIdList) => {
-
+      this.setState({AllMyData: ''});
       for (let i = 0; i < dataIdList.length; i++) {
         var dataId = dataIdList[i];
 
@@ -462,9 +439,9 @@ class App extends Component {
     const file = event.target.files[0]
     console.log('upload data type-------',this.state.DataType)
     let _validFileExtensions = [];
-    if(this.state.DataType === "0") {
+    if(this.state.DataType === "2") {
       _validFileExtensions = [".dcm", ".nii.gz", ".nii", ".img", ".doc"]
-    } else if(this.state.DataType === "1") {
+    } else if(this.state.DataType === "3") {
     _validFileExtensions = [".vcf", ".sam"];
     }
     var sFileName = event.target.value;
@@ -521,15 +498,33 @@ class App extends Component {
 
   handleOpen = () => this.setState({ show: true });
 
-  openImageData = () => this.setState({DataType: 0, OpenMyData: true});
+  openImageData = () => {
+    this.setState({
+      DataType: 2, 
+      OpenMyData: true
+    });
+    //this.refreshMarket();
+  };
 
-  openGenomicData = () => this.setState({DataType: 1, OpenMyData: true});
+  openGenomicData = () => {
+    this.setState({
+      DataType: 3,
+      OpenMyData: true
+    });
+    //this.refreshMarket();
+  };
 
   handleMyDataClose = () => this.setState({OpenMyData: false, DataType: null});
 
-  handleClose = () => this.setState({show: false});
+  handleClose = () => this.setState({show: false, ShowSubCategory: false, DataType: ''});
 
   handleSellModalClose = () => this.setState({ PutItOnMarket: false });
+
+  mapCategorySelection = (categories) => {
+    return (
+      categories.map((category, index) => <option value={index}>{category}</option>)
+    )
+  }
 
   onClick = async () => {
 
@@ -553,6 +548,7 @@ class App extends Component {
   } //onClick
 
   handleEventChange = (e) => {
+    const {BrainCheck, HeadCheck, ChestCheck, HeartCheck, AbdomenCheck, ExtremitiesCheck} = this.state.SubCategory;
     if (e.target.id === 'data_name') {
       this.setState({ Name: e.target.value });
     }
@@ -563,11 +559,21 @@ class App extends Component {
       this.setState({ PriceForSell: e.target.value });
     }
     if (e.target.id === 'data_type') { 
-      this.setState({DataType: e.target.value});
+      this.setState({DataType: e.target.value, Category: this.state.Categories[e.target.value]});
+      if (e.target.value === '2') {
+        this.setState({ShowSubCategory: true});
+      } else {
+        this.setState({ShowSubCategory: false});
+      }
+    }
+    if (e.target.id === 'category') {
+      this.setState({SelectCategory: e.target.value});
+    }
+    if (e.target.id === 'sub_category') {
+      this.setState({SubCategory: e.target.value});
     }
     if (e.target.id === 'image-check') {
       this.setState({ImageCheck: !this.state.ImageCheck});
-
     }
     if (e.target.id === 'genomic-check') {
       this.setState({GenomicCheck: !this.state.GenomicCheck});
@@ -578,22 +584,66 @@ class App extends Component {
     if (e.target.id === 'market-genomic-check') {
       this.setState({MarketGenomicCheck: !this.state.MarketGenomicCheck});
     }
+    if (e.target.id === 'head-check') {
+      this.setState({SubCategory: {...this.state.SubCategory, HeadCheck: !HeadCheck}});
+    }
+    if (e.target.id === 'brain-check') {
+      this.setState({SubCategory: {...this.state.SubCategory, BrainCheck: !BrainCheck}});
+    }
+    if (e.target.id === 'chest-check') {
+      this.setState({SubCategory: {...this.state.SubCategory, ChestCheck: !ChestCheck}});
+    }
+    if (e.target.id === 'heart-check') {
+      this.setState({SubCategory: {...this.state.SubCategory, HeartCheck: !HeartCheck}});
+    }
+    if (e.target.id === 'abdomen-check') {
+      this.setState({SubCategory: {...this.state.SubCategory, AbdomenCheck: !AbdomenCheck}});
+    }
+    if (e.target.id === 'extremities-check') {
+      this.setState({SubCategory: {...this.state.SubCategory, ExtremitiesCheck: !ExtremitiesCheck}});
+    }
+  }
+
+  convertSubCategoryToString = () => {
+    const {SubCategory} = this.state;
+    let selectSubCategory =[];
+
+    for (let key in SubCategory) {
+      if (SubCategory.hasOwnProperty(key)) {
+        if (SubCategory[key] === true) {
+          switch(key) {
+            case 'BrainCheck':
+              selectSubCategory.push('Brain');
+              break;
+            case 'HeartCheck':
+              selectSubCategory.push('Heart');
+              break;
+            case 'HeadCheck':
+              selectSubCategory.push('Head and Neck');
+              break;
+            case 'ChestCheck':
+              selectSubCategory.push('Chest');
+              break;
+            case 'AbdomenCheck':
+              selectSubCategory.push('Abdomen');
+              break;
+            case 'ExtremitiesCheck':
+              selectSubCategory.push('Extremities and Joints');
+              break;
+            default:
+              selectSubCategory.push('');
+          }         
+        }
+      }
+    }
+    this.setState({SelectSubCategory: selectSubCategory.join()})
   }
 
   onSubmit = async (event) => {
     event.preventDefault();
+    this.convertSubCategoryToString();
+    console.log("SelectSubCategory:", this.state.SelectSubCategory);
 
-    //bring in user's metamask account address
-    // const accounts = await web3.eth.getAccounts();
-
-    // console.log('Sending from Metamask account: ' + accounts[0]);
-
-    //obtain contract address from storehash.js
-    //const ethAddress = await storehash.options.address;
-    //this.setState({ ethAddress });
-
-    //save document to IPFS,return its hash#, and set hash# to state
-    //https://github.com/ipfs/interface-ipfs-core/blob/master/SPEC/FILES.md#add
     await ipfs.add(this.state.buffer, (err, ipfsHash) => {
       console.log(err, ipfsHash);
       //setState by setting ipfsHash to ipfsHash[0].hash
@@ -618,27 +668,22 @@ class App extends Component {
       //return the transaction hash from the ethereum contract
       //see, this https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send
       console.log('State', this.state.Name, this.state.Description);
+      console.log("DataType:",this.state.DataType, "Category:",this.state.SelectCategory.toString());
+      console.log("ipfsHash:", this.state.ipfsHash)
+      console.log("EncryptKey:", this.state.EncryptKey.toString());
+      console.log("FileExtension:", this.state.FileExtension);
 
-      // this.contract.deployed().then((contractInstance) => {
-      // console.log(contractInstance)
-      // contractInstance.uploadData(this.state.Name,this.state.Description,ipfsHash[0].hash,{
-      // from: this.state.account,
-      // gas: 500000
-      // });
-      // })
-      console.log(this.state.DataType);
-      console.log("=====web3 version", web3.version);
-      console.log("EncryptKey", this.state.EncryptKey);
       this.state.ContractInstance.uploadData(
         this.state.Name,
         this.state.Description,
         this.state.DataType,
+        this.state.SelectCategory.toString(),
         this.state.ipfsHash,
         this.state.EncryptKey.toString(),
         this.state.FileExtension,
         {
           from: this.state.account,
-          gas: 500000
+          gas: 5000000
         }).catch(err => console.log(err));
       this.setState({
         show: false,
@@ -656,118 +701,15 @@ class App extends Component {
       this.state.Name.length > 0 &&
       this.state.Description.length > 0;
     let showUploadImage = 
-      this.state.DataType === "0" ?  "form-group" : "hide-upload-button";
+      this.state.DataType === "2" ?  "form-group" : "hide-upload-button";
     let showUploadGenomic = 
-    this.state.DataType === "1" ? "form-group" : "hide-upload-button";
-//     return (
-//       <div className="App">
-//         <header className="App-header">
-//           <div>{this.state.account}</div>
-//           <div> Amrita MVP </div>
-//           <div>{this.state.balance}</div>
-//         </header>
+    this.state.DataType === "3" ? "form-group" : "hide-upload-button";
 
+    let showMainPage = this.state.ShowMainPage ? '' : 'hide-content';
+    let showDataMarket = this.state.ShowDataMarket ? '' : 'hide-content';
+    let ShowSubCategory = this.state.ShowSubCategory ? '' : 'hide-content';
 
-//         <div className="row">
-//           <div className="column1">
-//           <Button bsStyle="primary" type="submit" onClick={this.handleOpen}>
-//               Upload Data
-//           </Button>
-//           <label style={{float: "right"}}>
-//           <label>Image:</label>
-//           <input type="checkbox" id="image-check" checked={this.state.ImageCheck} onChange={this.handleEventChange} />
-//           </label>
-//           <label style={{float: "right"}}>
-//           <label>Genomic:</label>
-//           <input type="checkbox" id="genomic-check" checked={this.state.GenomicCheck} onChange={this.handleEventChange} />
-//           </label>
-//           <div className='my-data'>{this.AllMyData(this.state.AllMyData)}</div>
-//           </div>
-//           <div className="column2">
-//             <div>
-//               <label style={{float: "right"}}>
-//               <label>Image:</label>
-//               <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
-//               </label>
-//               <label style={{float: "right"}}>
-//               <label>Genomic:</label>
-//               <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
-//               </label>
-//             </div>
-//           <div className='market-data'>{this.DataForSale(this.state.DataForSale)}</div>
-//           </div>
-//         </div>
-
-//         <Modal show={this.state.show} onHide={this.handleClose}>
-//           <Modal.Header closeButton>
-//             <Modal.Title>Upload Your Data</Modal.Title>
-//           </Modal.Header>
-//           <Modal.Body>
-//             <Form onSubmit={this.onSubmit}>
-//               <div className='form-group'>
-//                 <label>Data name</label>
-//                 <input type="text" className='form-control' id="data_name" onChange={this.handleEventChange} placeholder="Enter the name of your article" />
-//               </div>
-//               {/* <div className="form-group">
-//  <label for="price">Price in ETH</label>
-//  <input type="number" className="form-control" id="article_price" placeholder="1" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" />
-//  </div> */}
-//               <div className='form-group'>
-//                 <label>Description</label>
-//                 <textarea type="text" className='form-control vresize' id="data_description" onChange={this.handleEventChange} placeholder="Describe your article" maxLength="255"></textarea>
-//               </div>
-//               <div className='form-group'>
-//                 <label>Data Type</label>
-//                 <select className="form-control" id="data_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type">
-//                   <option value="" disabled selected>Please Select Upload Data Type</option>
-//                   <option value="0">Image</option>
-//                   <option value="1">Genomic</option>
-//                 </select>
-//               </div>
-//               <div className={showUploadImage}>
-//                 <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")}/>
-//               </div>
-//               <div className={showUploadGenomic}>
-//                 <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")}/>
-//               </div>
-//             </Form>
-//           </Modal.Body>
-//           <Modal.Footer>
-//             <button className='btn btn-primary' type='submit' onClick={this.onSubmit} disabled={!isEnabled}>Submit</button>
-//             <button className='btn btn-default' onClick={this.handleClose}>Close</button>
-//           </Modal.Footer>
-//         </Modal>
-
-
-//         <Modal show={this.state.PutItOnMarket} onHide={this.handleSellModalClose}>
-//           <Modal.Header closeButton>
-//             <Modal.Title>Put Your Data On The Market</Modal.Title>
-//           </Modal.Header>
-//           <Modal.Body>
-//             <Form onSubmit={this.sellMyData}>
-//               <div className='form-group'>
-//                 <label>Data name:&nbsp;&nbsp;</label>
-//                 <label>{this.state.NameForSale}</label>
-//               </div>
-//               <div className='form-group'>
-//                 <label>Description:&nbsp;&nbsp;</label>
-//                 <label>{this.state.DescriptionForSale}</label>
-//               </div>
-//               <div className="form-group">
-//                 <label>Price in ETH</label>
-//                 <input type="number" className="form-control" id="data_price" onChange={this.handleEventChange} placeholder="1" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" />
-//               </div>
-//             </Form>
-//           </Modal.Body>
-//           <Modal.Footer>
-//             <button className='btn btn-primary' type='submit' onClick={this.sellMyData}>Submit</button>
-//             <button className='btn btn-default' onClick={this.handleSellModalClose}>Close</button>
-//           </Modal.Footer>
-//         </Modal>
-
-//       </div>
-//     );
-
+    const {BrainCheck, HeadCheck, ChestCheck, HeartCheck, AbdomenCheck, ExtremitiesCheck} = this.state.SubCategory;
 return (
   <div>
     <header>		
@@ -817,32 +759,51 @@ return (
     <div className="container">
       <div className="row" id="section-2">
 
-        <div className="col-md-3 sidebar">
-          <div className="btn btn-green text-center btn-lg" onClick={this.handleOpen}>Upload</div>
-          {/* <div className="box top-space-10">
-            <div className="box-head">
-              <h4 className="box-title">My Data 1</h4>
-            </div>
-            <div className="box-body">
-              <p className="color-green">Address <button className="btn btn-primary btn-small pull-right">SELL</button></p>
-              <p className="top-space-10">QWERTYUIOPSDFGHJKLVBNMHGJKLASDASD</p>
-            </div>
-          </div> */}
+        <div className="col-md-3">
+          <div className="btn text-center btn-lg upload-btn" onClick={this.handleOpen}>Upload</div>
+          
           <div className="top-space-10">
-            <div className="onClickTextOverImage-image" onClick={this.openImageData}>
+
+          <div className="parent-image" onClick={this.openImageData}>
+		        <div className="child-image bg-one overlay">
+			         <a className="image-name"> Imaging Data</a>
+		        </div>
+	        </div>
+
+          <div className="parent-image" onClick={this.openGenomicData}>
+		        <div className="child-image bg-two">
+			         <a className="image-name">Genetic Data</a>
+		        </div>
+	        </div>
+
+          <div className="parent-image" onClick={this.openGenomicData}>
+		        <div className="child-image bg-three">
+			         <a className="image-name">EMR</a>
+		        </div>
+	        </div>
+
+          <div className="parent-image" onClick={this.openGenomicData}>
+		        <div className="child-image bg-four">
+			         <a className="image-name">Numerical Measurement</a>
+		        </div>
+	        </div>
+
+              {/* <div className="onClickTextOverImage-image" onClick={this.openImageData}>
                 <div className="text">
-                  Image Data
+                   <a>Image Data</a>
                 </div>
             </div>
 
               <div className="onClickTextOverImage-genomic" onClick={this.openGenomicData}>
                 <div className="text">
-                  Genomic Data
+                   <a>Genetic Data</a>
                 </div>
-              </div>
+              </div> */}
+
         </div>
         </div>
 
+        <div className={showDataMarket}>
         <div className="col-md-9">
 
           {/* <div className="box top-space-20 text-center">
@@ -856,33 +817,63 @@ return (
             <div className='panel-head'>Market Data</div>
             <div className='panel-body'>{this.DataForSale(this.state.DataForSale)}</div>
           </div> */}
+          <div className='market-header'>
+            <div className="back-button" onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false})}>
+              <span><i className="fa fa-chevron-left fa-lg" /></span>
+              <span>Back</span>
+            </div>
 
-          <table className="table table-bordered table-striped">
+            <div>
+            <span className='marketplace-label'>Data Marketplace</span>
+            </div>
+            
+            <div className='filter-check-box'>
+              <span>
+                  <label>Image:</label>
+                  <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
+              </span>
+              <span>
+                 <label>Gene:</label>
+                 <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
+              </span>
+            </div>
+            
+          </div>
+          <table className="table table-striped">
           <thead>
             <tr>
               <th>Name</th>
               <th>Description</th>
               <th>Data Type</th>
+              <th>Category</th>
               <th>Price</th>
               <th>Seller</th>
-              <th>
-              <label style={{display: 'flex', justifyContent: 'center'}}>
-              <label >
-              <label>Image:</label>
-               <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
-               </label>
-               <label >
-               <label>Genomic:</label>
-               <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
-             </label>
-             </label>
-              </th>
+              <th>Rating</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {this.DataForSale(this.state.DataForSale)}
           </tbody>
         </table>
+        </div>
+        </div>
+
+       <div className={showMainPage}>
+        <div className="col-md-9 maincontent">
+
+				<div className="entrance-image-container">
+					<div className="box entrance entrance-data text-center">
+						<a onClick={() => this.setState({ShowMainPage: false, ShowDataMarket: true})} style={{color:'white'}}><h1>Data Marketplace</h1></a>
+					</div>
+        </div>
+
+        <div className="entrance-image-container">
+					<div className="box top-space-10 entrance entrance-al text-center">
+						<a style={{color: 'white'}}><h1>AI Marketplace</h1></a>
+					</div>
+				</div>
+				</div>
         </div>
 
       </div>
@@ -893,37 +884,37 @@ return (
         <div className="col-sm-8">
           <div className="col-sm-4">
             <div className="text-center">
-              <h4>Lorem ipsum</h4>
+              <h4>Amrita Network</h4>
               <ul className="footer-menu">
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
               </ul>
             </div>
           </div>
           <div className="col-sm-4">
             <div className="text-center">
-              <h4>Lorem ipsum</h4>
+              <h4>Amrita Network</h4>
               <ul className="footer-menu">
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
               </ul>
             </div>
           </div>
           <div className="col-sm-4">
             <div className="text-center">
-              <h4>Lorem ipsum</h4>
+              <h4>Amrita Network</h4>
               <ul className="footer-menu">
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
-                <li>Lorem ipsum</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
+                <li>Amrita Network</li>
               </ul>
             </div>
           </div>
@@ -931,8 +922,8 @@ return (
         <div className="col-sm-4 right-sidebar">
           <div className="col-sm-8 col-sm-offset-2">
             <div className="text-center">
-              <h4>Lorem ipsum</h4>
-              <p>A B C D</p>
+              <h4>Amrita Network</h4>
+              <p>Amrita MVP</p>
             </div>
           </div>
         </div>
@@ -942,7 +933,7 @@ return (
 
     <Modal show={this.state.OpenMyData} onHide={this.handleMyDataClose}>
       <Modal.Header closeButton>
-        <Modal.Title>{this.state.DataType === 1 ? 'Genomic' : 'Image'} Data</Modal.Title>
+        <Modal.Title>{this.state.MainCategory[this.state.DataType]} Data</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <table className="table table-hover">
@@ -976,12 +967,68 @@ return (
                 <textarea type="text" className='form-control vresize' id="data_description" onChange={this.handleEventChange} placeholder="Describe your article" maxLength="255" required></textarea>
               </div>
               <div className='form-group'>
+                <label>Storage Type</label>
+                <select className="form-control" id="storage_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
+                  <option value="" disabled selected>Please Select Storage Type</option>
+                  <option value="0">IPFS</option>
+                  <option value="1">StorJ</option>
+                  <option value="2">AWS</option>
+                  <option value="3">Google Cloud</option>
+                  <option value="4">Microsoft Azure</option>
+                </select>
+              </div>
+              <div className='form-group'>
                 <label>Data Type</label>
                 <select className="form-control" id="data_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
                   <option value="" disabled selected>Please Select Upload Data Type</option>
-                  <option value="0">Image</option>
-                  <option value="1">Genomic</option>
+                  <option value="0">EMR</option>
+                  <option value="1">Numerical Measurement</option>
+                  <option value="2">Medical Imaging Data</option>
+                  <option value="3">Genetic Data</option>
                 </select>
+              </div>
+              <div className='form-group'>
+                <label>Category</label>
+                <select className="form-control" id="category" onChange={this.handleEventChange} placeholder="Please select a category" required>
+                  <option value="" disabled selected>Please Select A Category</option>
+                  {this.mapCategorySelection(this.state.Category)}
+                </select>
+              </div>
+              <div className={`form-group ${ShowSubCategory}`}>
+                <label>SubCategory</label>
+                {/* <select className="form-control" id="sub_category" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
+                  <option value="" disabled selected>Please Select A SubCategory</option>
+                  <option value="0">Brain</option>
+                  <option value="1">Head and Neck</option>
+                  <option value="2">Chest</option>
+                  <option value="3">Heart</option>
+                  <option value="4">Abdomen</option>
+                  <option value="5">Extremities and Joint</option>
+                </select> */}
+                <div>
+                  <input type="checkbox" id="brain-check" checked={BrainCheck} onChange={this.handleEventChange} />
+                  <label className="checkbox-label-spacing">Brain</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="head-check" checked={HeadCheck} onChange={this.handleEventChange} />
+                  <label className="checkbox-label-spacing">Head and Neck</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="chest-check" checked={ChestCheck} onChange={this.handleEventChange} />
+                  <label className="checkbox-label-spacing">Chest</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="heart-check" checked={HeartCheck} onChange={this.handleEventChange} />
+                  <label className="checkbox-label-spacing">Heart</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="abdomen-check" checked={AbdomenCheck} onChange={this.handleEventChange} />
+                  <label className="checkbox-label-spacing">Abdomen</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="extremities-check" checked={ExtremitiesCheck} onChange={this.handleEventChange} />
+                  <label className="checkbox-label-spacing">Extremities and Joints</label>
+                </div>
               </div>
               <div className={showUploadImage}>
                 <input type='file' onChange={this.captureFile} disabled={(this.state.DataType === "")} required/>
