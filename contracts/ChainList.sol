@@ -2,7 +2,7 @@ pragma solidity ^0.4.19;
 pragma experimental ABIEncoderV2;
 
 contract ChainList {
-  enum DataType {IMAGE, GENOMIC}
+  enum DataType {EMR, NUMERICAL_MEASUREMENT, MEDICAL_IMAGING_DATA, GENETIC_DATA}
   // Healthcare Data struct
   struct HealthData {
     uint id;
@@ -16,6 +16,7 @@ contract ChainList {
     DataType dataType;
     string key;
     string extension;
+    string category;
   }
 
   // list of data for sale
@@ -42,7 +43,7 @@ contract ChainList {
   );
 
   // store ipfsAddress with data name and description into ethereum
-  function uploadData(string _name, string _description, DataType _dataType, string _ipfsAddress, string _key, string _extension) public {
+  function uploadData(string _name, string _description, DataType _dataType, string _category, string _ipfsAddress, string _key, string _extension) public {
    dataCounter++;
 
    dataList[dataCounter] = HealthData(
@@ -56,7 +57,8 @@ contract ChainList {
      false,
      _dataType,
      _key,
-     _extension
+     _extension,
+     _category
    );
 
    dataListByAccount[msg.sender].push(HealthData(
@@ -71,7 +73,8 @@ contract ChainList {
      false,
      _dataType,
      _key,
-     _extension
+     _extension,
+     _category
    ));
   }
 

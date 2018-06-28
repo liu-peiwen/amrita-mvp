@@ -119,17 +119,20 @@ body {
 
 /* Track */
 ::-webkit-scrollbar-track {
-    background: #f1f1f1; 
+    background: #f1f1f1;
+    display: none; 
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    background: #aaa; 
+    background: #aaa;
+    display: none;  
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
     background: #888; 
+    display: none; 
 }
 
 h1,h2,h3,h4,h5,h6 {
@@ -483,19 +486,32 @@ nav.navbar {
   width: 100%;
   border-radius: 1px;
 }
+
 #section-2 .maincontent .box {
-  height: 350px;
+  height: 440px;
+  margin-top: 0 !important;
+}
+#section-2 .maincontent .entrance-image-container {
+  width: 100%;
+  height: 100%;
   overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  margin-bottom: 30px;
+}
+#section-2 .maincontent .box.entrance-data:hover {
+  transform: scale(1.2);
+  transition: all 0.5s ease-out;
 }
 #section-2 .maincontent .box.entrance-data {
-  /* background: url('../images/slider/2.jpg'); */
+  background: url('./images/2.png');
   background-size: cover;
 }
 #section-2 .maincontent .box.entrance h1 {
   height: 100%;
   color: white;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
-  padding-top: 14%;
+  padding-top: 20%;
   transition: all 0.5s ease-out;
 }
 #section-2 .maincontent .box.entrance h1:hover {
@@ -504,8 +520,12 @@ nav.navbar {
 
 }
 #section-2 .maincontent .box.entrance-al {
-  /* background: url('../images/slider/4.jpg'); */
+  background: url('./images/1.png');
   background-size: cover;
+}
+#section-2 .maincontent .box.entrance-al:hover {
+  transform: scale(1.2);
+  transition: all 0.5s ease-out;
 }
 #box-1 {
   height: 150px;
@@ -664,15 +684,18 @@ nav.navbar {
 }
 
 .onClickTextOverImage-image{
-  width:200px;
-  height:200px;
+  width: 200px;
+  height: 200px;
   background-size:cover;
+  background-repeat: no-repeat;
   display: table;
   margin: 10px auto;
-  border-radius:16px;
-  box-shadow:0 0 16px rgba(0,0,0,0.5);
+  border-radius: 16px;
+  box-shadow: 0 0 16px rgba(0,0,0,0.5);
   position:relative;
+  overflow: hidden;
   background-image: url('./images/image.png');
+  transition: all .5s;
 }
 
 .onClickTextOverImage-genomic{
@@ -716,24 +739,30 @@ nav.navbar {
 table {
   /* table-layout: fixed;
   width: 50px; */
-  border-radius: 4px;
+  max-width: 100% !important;
+  margin: 10px 0 !important;
 }
 
 td {
   max-width: 70px;
-  font-size: 18px !important;
+  font-size: 15px !important;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
   padding: 5px 0;
   vertical-align: middle !important;
 }
+
+th {
+  background: lightgrey;
+}
+
 .market-data {
   display: flex;
 }
 
 .table-striped > tbody > tr:nth-child(2n+1) > td, .table-striped > tbody > tr:nth-child(2n+1) > th {
-  background-color: #2F8ECE;
+  background-color: #87CEFA !important;
 }
 .table-striped > tbody > tr:nth-child(2n) > td, .table-striped > tbody > tr:nth-child(2n) > th {
   background-color: #ffffff;
@@ -746,6 +775,168 @@ td {
   overflow: hidden;
 }
 
-.can-not-buy td{
-  background-color: gray !important;
+.can-not-buy button{
+  display: none;
+}
+
+.upload-btn {
+  background-color: #BCD085;
+  border-radius: 8px !important;
+  width: 200px;
+  height: 50%;
+  display: table;
+  margin: 0 auto;
+}
+
+.market-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.marketplace-label {
+  font-size: 26px;
+  font-family: Monospaced Number,Chinese Quote,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,PingFang SC,Hiragino Sans GB,Microsoft YaHei,Helvetica Neue,Helvetica,Arial,sans-serif;  
+  margin: 0 250px; 
+  /* background-image: url('./images/label-background.png'); */
+}
+
+.text {
+  font-size: 20px;
+}
+
+.hide-content {
+  display: none;
+}
+
+.back-button {
+  background-color: darkgray;
+  cursor: pointer;
+  padding: 8px 16px 4px 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+.back-button span:nth-child(1) {
+  display: block;
+  width: 15px;
+  margin: 0 auto;
+}
+
+.back-button span:nth-child(2) {
+  font-size: 16px;
+  margin-left: 4px;
+  display: block;
+}
+
+.filter-check-box {
+  background-color: darkgray;
+  padding: 4px 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.filter-check-box span:nth-child(1) {
+  display: block;
+}
+
+.filter-check-box span:nth-child(2) {
+  display: block;
+}
+
+.checked {
+  color: orange;
+}
+
+.checkbox-label-spacing {
+  margin-left: 8px;
+}
+
+/* Image zoom on hover + Overlay colour */
+.parent-image {
+  width: 200px;
+  margin: 15px auto;
+  height: 200px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  display: table;
+}
+
+.child-image {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  opacity: 0.8;
+  border-radius: 16px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  -webkit-transition: all .5s;
+  -moz-transition: all .5s;
+  -o-transition: all .5s;
+  transition: all .5s;
+}
+.bg-one {
+  background-image: url('./images/Medical-Imaging-Data.png');
+  background-color:rgba(0,0,0,0.2) !important;
+}
+.bg-two {background-image: url('./images/Genetic-Data.png');}
+.bg-three {background-image: url('./images/EMR.png');}
+.bg-four {background-image: url('./images/Numerical-Measurement.png');}
+
+.image-name {
+  font-size: 20px;
+  color: #ffffff !important;
+  font-family: sans-serif;
+  text-align: center;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  height: 50px;
+  cursor: pointer;
+  text-decoration: none;
+  z-index: 1;
+}
+
+.parent-image:hover .child-image, .parent-image:focus .child-image {
+  -ms-transform: scale(1.2);
+  -moz-transform: scale(1.2);
+  -webkit-transform: scale(1.2);
+  -o-transform: scale(1.2);
+  transform: scale(1.2);
+}
+
+.parent-image:hover .child-image:before, .parent-image:focus .child-image:before {
+  display: block;
+}
+.parent-image:hover .child-image:after, .parent-image:focus .child-image:after {
+  display: none;
+}
+
+.parent-image:hover a, .parent-image:focus a {
+  display: block;
+}
+
+.child-image:before {
+  content: "";
+  display: none;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color:rgba(0,0,0,0.6) !important;
+}
+
+.child-image:after {
+  content: "";
+  display: block;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color:rgba(0,0,0,0.3);
 }
