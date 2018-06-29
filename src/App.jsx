@@ -13,7 +13,7 @@ import web3 from './web3';
 
 import ipfs from './ipfs';
 
-import chainList from './ChainList.json'
+import chainList from './build/contracts/ChainList.json';
 const TruffleContract = require('truffle-contract');
 const aesjs = require('aes-js');
 const fs = require('browserify-fs');
