@@ -504,7 +504,7 @@ nav.navbar {
   transition: all 0.5s ease-out;
 }
 #section-2 .maincontent .box.entrance-data {
-  background: url('./images/2.png');
+  background: url('./images/Data-Market-Place.png');
   background-size: cover;
 }
 #section-2 .maincontent .box.entrance h1 {
@@ -520,7 +520,7 @@ nav.navbar {
 
 }
 #section-2 .maincontent .box.entrance-al {
-  background: url('./images/1.png');
+  background: url('./images/AI-Market-Place.png');
   background-size: cover;
 }
 #section-2 .maincontent .box.entrance-al:hover {
