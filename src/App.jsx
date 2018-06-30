@@ -1,5 +1,5 @@
 import { Form, Modal} from 'react-bootstrap';
-import { Button, Checkbox, Input, Select, Upload, message, Icon} from 'antd';
+import { Button, Checkbox, Input, Select, Upload, message, Icon, Pagination, Rate, Breadcrumb} from 'antd';
 import React, { Component } from 'react';
 import 'antd/dist/antd.css';
 import logo from './images/logo.png';
@@ -238,19 +238,23 @@ class App extends Component {
             <td style={{textAlign:"center"}}>{category}</td>
             <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;AMN</td>
             <td style={{textAlign:"center"}}>
-              <span className="fa fa-star checked"></span>
-              <span className="fa fa-star checked"></span>
-              <span className="fa fa-star checked"></span>
-              <span className="fa fa-star checked"></span>
-              <span className="fa fa-star checked"></span>
+            <Rate allowHalf defaultValue={4.5} />
             </td>
-            <td style={{textAlign: "center" ,width: "100px"}} className={userOwnData}>
+            <td style={{textAlign: "center" ,width: "150px"}} className={userOwnData}>
+              <div>
               <span onClick={() => this.openDetailModal(index)}>Details</span>
-              <Button className='primary' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</Button>
+              <Button type='primary' style={{marginLeft: '15px'}} onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</Button>
+              </div>
             </td>
           </tr>
         )
       }) : null
+    )
+  }
+
+  paginationBar = () => {
+    return (
+      <Pagination showQuickJumper defaultCurrent={2} total={500} />
     )
   }
   
@@ -671,7 +675,7 @@ return (
 								<span className="icon-bar"></span>
 							</button>
             
-							<a className="navbar-brand"><img src={logo} height="50" /></a>
+							<a className="navbar-brand"onClick={() => window.location.reload()} ><img src={logo} height="50" /></a>
 						</div>
 						
 						<div className="navbar-collapse collapse">
@@ -738,47 +742,50 @@ return (
       </div>
 
       <div className={showDataMarket}>
-        <div className="col-md-9 data-market">
-
+        <div className="col-md-9 data-market" style={{display: "relative"}}>
           <div className='market-header'>
-
-            {/* <div className="back-button" onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false})}>
-              <span><i className="fa fa-chevron-left fa-lg" /></span>
-              <span>Back</span>
-            </div> */}
-
-          <div className='market-header-title'>  
-            <h1 className='marketplace-label'>Data Marketplace</h1>
-            <Button onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false})}>Back</Button>
+            <div className='bread-crumb'>
+            <Breadcrumb>
+                <Breadcrumb.Item>Home</Breadcrumb.Item>
+                <Breadcrumb.Item><a href="">Application Center</a></Breadcrumb.Item>
+              </Breadcrumb>
+            </div>
+            <div className='market-header-title'> 
+              <h1 className='marketplace-label'>Data Marketplace</h1>
+              <Button onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false})}>Back</Button>
+            </div>
           </div>
-          </div>
-          <span style={{marginRight: '25px', marginTop: '15px'}}> 
+
+          <span style={{marginRight: '10px', marginTop: '15px'}}> 
               <label style={{margin: '0 10px'}}>Image:</label>
               <Checkbox id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
           </span>
           <span>
-              <label style={{marginRight: '5px'}}>Gene:</label>
+              <label style={{margin: '0 10px'}}>Gene:</label>
               <Checkbox id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
           </span>
           <div className='table-wrapper'>
-          <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Data Type</th>
-              <th>Category</th>
-              <th>Price</th>
-              <th>Rating</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.DataForSale(this.state.DataForSale)}
-          </tbody>
-        </table>
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Data Type</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Rating</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.DataForSale(this.state.DataForSale)}
+              </tbody>
+            </table>
         </div>
+        <div style={{width: "100%", margin: "0 auto", position:"absolute", left:"28%"}}>
+            {this.paginationBar()}
         </div>
-        </div>
+      </div>
+    </div>
 
        <div className={showMainPage}>
         <div className="col-md-9 maincontent">
@@ -800,56 +807,8 @@ return (
       </div>
     </div>
 
-    <div className="footer">
-      <div className="row">
-        <div className="col-sm-8">
-          <div className="col-sm-4">
-            <div className="text-center">
-              <h4>Amrita Network</h4>
-              <ul className="footer-menu">
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-              </ul>
-            </div>
-          </div>
-          <div className="col-sm-4">
-            <div className="text-center">
-              <h4>Amrita Network</h4>
-              <ul className="footer-menu">
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-              </ul>
-            </div>
-          </div>
-          <div className="col-sm-4">
-            <div className="text-center">
-              <h4>Amrita Network</h4>
-              <ul className="footer-menu">
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div className="col-sm-4 right-sidebar">
-          <div className="col-sm-8 col-sm-offset-2">
-            <div className="text-center">
-              <h4>Amrita Network</h4>
-              <p>Amrita MVP</p>
-            </div>
-          </div>
-        </div>
-         
-      </div>
+    <div className="footer-amrita">
+      <div>Copyright ©2011-2018 AMRITA NETWORK ALL RIGHTS RESERVED</div>
     </div>
 
     <Modal show={this.state.OpenMyData} onHide={this.handleMyDataClose}>
@@ -958,22 +917,22 @@ return (
           </Modal.Header>
           <Modal.Body>
             <Form onSubmit={this.sellMyData}>
-              <div className='form-group'>
+              <div className='form-group sell-data-modal'>
                 <label>Data name:&nbsp;&nbsp;</label>
-                <label>{this.state.NameForSale}</label>
+                <span>{this.state.NameForSale}</span>
               </div>
-              <div className='form-group'>
+              <div className='form-group sell-data-modal'>
                 <label>Description:&nbsp;&nbsp;</label>
-                <label>{this.state.DescriptionForSale}</label>
+                <span>{this.state.DescriptionForSale}</span>
               </div>
-              <div className="form-group">
-                <label>Price in AMN</label>
+              <div className="form-group sell-data-modal">
+                <label style={{paddingRight: '7px'}}>Price in AMN:</label>
                 <input type="number" className="form-control" id="data_price" onChange={this.handleEventChange} placeholder="1" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" />
               </div>
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button type='primary' onClick={this.sellMyData}>Submit</Button>
+            <Button style={{marginRight: "10px"}} type='primary' onClick={this.sellMyData}>Submit</Button>
             <Button onClick={this.handleSellModalClose}>Close</Button>
           </Modal.Footer>
         </Modal>
@@ -1010,13 +969,7 @@ return (
               </div>
               <div className='form-group show-details'>
                 <label>Rating:&nbsp;&nbsp;</label>
-                <span>
-                  <span className="fa fa-star checked"></span>
-                  <span className="fa fa-star checked"></span>
-                  <span className="fa fa-star checked"></span>
-                  <span className="fa fa-star checked"></span>
-                  <span className="fa fa-star checked"></span>
-                </span>
+                <Rate allowHalf defaultValue={4.5} />
               </div>
               <div className='form-group show-details'>
                 <label>Description:&nbsp;&nbsp;</label>
