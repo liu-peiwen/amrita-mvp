@@ -234,11 +234,9 @@ class App extends Component {
         return (
           <tr key={index}>
             <td style={{textAlign:"center"}}>{data[0].Name}</td>
-            <td style={{textAlign:"center"}}>{data[0].Description}</td>
             <td style={{textAlign:"center"}}>{mainCategory}</td>
             <td style={{textAlign:"center"}}>{category}</td>
             <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;AMN</td>
-            <td style={{textAlign:"center"}}>{data[0].Seller}</td>
             <td style={{textAlign:"center"}}>
               <span className="fa fa-star checked"></span>
               <span className="fa fa-star checked"></span>
@@ -247,8 +245,8 @@ class App extends Component {
               <span className="fa fa-star checked"></span>
             </td>
             <td style={{textAlign: "center" ,width: "100px"}} className={userOwnData}>
-              <span onClick={() => this.openDetailModal(index)}>Show Details</span>
-              <button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button>
+              <span onClick={() => this.openDetailModal(index)}>Details</span>
+              <Button className='primary' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</Button>
             </td>
           </tr>
         )
@@ -268,7 +266,7 @@ class App extends Component {
             <td style={{textAlign:"center"}}>{this.showDecryptData(data[0].IpfsAddress, this.state.AllMyData[index][0].EncryptKey)}</td>
             <td style={{textAlign:"center"}}>
             <span onClick={() => this.openMyDataDetailsModal(index)} className='detail'>Details</span>
-            <button className='btn btn-primary' onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</button>
+            <Button type="primary" onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</Button>
             </td>
           </tr>
         )
@@ -417,7 +415,7 @@ class App extends Component {
             }
         }
         if (!blnValid) {
-            alert("Sorry, " + sFileName + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
+            message.error("Sorry, " + sFileName + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
             event.target.value = "";
             return false;
         }
@@ -754,7 +752,7 @@ return (
             <Button onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false})}>Back</Button>
           </div>
           </div>
-          <span style={{marginRight: '25px'}}> 
+          <span style={{marginRight: '25px', marginTop: '15px'}}> 
               <label style={{margin: '0 10px'}}>Image:</label>
               <Checkbox id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
           </span>
@@ -767,11 +765,9 @@ return (
           <thead>
             <tr>
               <th>Name</th>
-              <th>Description</th>
               <th>Data Type</th>
               <th>Category</th>
               <th>Price</th>
-              <th>Seller</th>
               <th>Rating</th>
               <th></th>
             </tr>

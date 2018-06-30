@@ -2,7 +2,7 @@ pragma solidity ^0.4.19;
 pragma experimental ABIEncoderV2;
 
 contract ChainList {
-  enum DataType {EMR, NUMERICAL_MEASUREMENT, MEDICAL_IMAGING_DATA, GENETIC_DATA}
+  enum DataType {MEDICAL_IMAGING_DATA, GENETIC_DATA, EMR, NUMERICAL_MEASUREMENT}
   // Healthcare Data struct
   struct HealthData {
     uint id;
