@@ -471,6 +471,21 @@ class App extends Component {
     });
   };
 
+  openEMRData = () => {
+    this.setState({
+      DataType: 0,
+      OpenMyData: true
+    });
+  };
+
+  openNumericalData = () => {
+    this.setState({
+      DataType: 1,
+      OpenMyData: true
+    });
+  };
+
+
   handleMyDataClose = () => this.setState({OpenMyData: false, DataType: null});
 
   handleClose = () => this.setState({show: false, ShowSubCategory: false, DataType: ''});
@@ -727,13 +742,13 @@ return (
 		        </div>
 	        </div>
 
-          <div className="parent-image" onClick={this.openGenomicData}>
+          <div className="parent-image" onClick={this.openEMRData}>
 		        <div className="child-image bg-three">
 			         <a className="image-name">EMR</a>
 		        </div>
 	        </div>
 
-          <div className="parent-image" onClick={this.openGenomicData}>
+          <div className="parent-image" onClick={this.openNumericalData}>
 		        <div className="child-image bg-four">
 			         <a className="image-name">Numerical Measurement</a>
 		        </div>
@@ -816,18 +831,18 @@ return (
         <Modal.Title>{this.state.MainCategory[this.state.DataType]}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <table className="table table-hover">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Ipfs Address</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.AllMyData(this.state.AllMyData, this.state.DataType)}
-          </tbody>
-        </table>
+            <table className="table table-hover">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Ipfs Address</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.AllMyData(this.state.AllMyData, this.state.DataType)}
+              </tbody>
+            </table>
       </Modal.Body>
     </Modal>
 
