@@ -61,6 +61,7 @@ class App extends Component {
       MarketGenomicCheck: true,
       ShowDataMarket: false,
       ShowMainPage: true,
+      ShowAIMarket: false,
       ShowSubCategory: false,
 
       NameForDetail: '',
@@ -673,6 +674,7 @@ class App extends Component {
 
     let showMainPage = this.state.ShowMainPage ? '' : 'hide-content';
     let showDataMarket = this.state.ShowDataMarket ? '' : 'hide-content';
+    let showAIMarket = this.state.ShowAIMarket ? '' : 'hide-content';
     let ShowSubCategory = this.state.ShowSubCategory ? '' : 'hide-content';
 
     const {BrainCheck, HeadCheck, ChestCheck, HeartCheck, AbdomenCheck, ExtremitiesCheck} = this.state.SubCategory;
@@ -756,20 +758,37 @@ return (
         </div>
       </div>
 
+      <div className={showAIMarket}>
+        <div className="col-md-9 data-market" style={{display: "relative"}}>
+          <div className='market-header'>
+            <div className='bread-crumb'>
+            <Breadcrumb>
+                <Breadcrumb.Item>Home</Breadcrumb.Item>
+                <Breadcrumb.Item><a href="">AI Marketplace</a></Breadcrumb.Item>
+              </Breadcrumb>
+            </div>
+            <div className='market-header-title'> 
+              <h1 className='marketplace-label'>AI Marketplace</h1>
+              <Button onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false, ShowAIMarket: false})}>Back</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className={showDataMarket}>
         <div className="col-md-9 data-market" style={{display: "relative"}}>
           <div className='market-header'>
             <div className='bread-crumb'>
             <Breadcrumb>
                 <Breadcrumb.Item>Home</Breadcrumb.Item>
-                <Breadcrumb.Item><a href="">Application Center</a></Breadcrumb.Item>
+                <Breadcrumb.Item><a href="">Data Marketplace</a></Breadcrumb.Item>
               </Breadcrumb>
-            </div>
+          </div>
             <div className='market-header-title'> 
               <h1 className='marketplace-label'>Data Marketplace</h1>
-              <Button onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false})}>Back</Button>
+              <Button onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false, ShowAIMarket: false})}>Back</Button>
             </div>
-          </div>
+        </div>
 
           <span style={{marginRight: '10px', marginTop: '15px'}}> 
               <label style={{margin: '0 10px'}}>Image:</label>
@@ -807,13 +826,13 @@ return (
 
 				<div className="entrance-image-container">
 					<div className="box entrance entrance-data text-center">
-						<a onClick={() => this.setState({ShowMainPage: false, ShowDataMarket: true})} style={{color:'white'}}><h1>Data Marketplace</h1></a>
+						<a onClick={() => this.setState({ShowMainPage: false, ShowDataMarket: true, ShowAIMarket: false})} style={{color:'white'}}><h1>Data Marketplace</h1></a>
 					</div>
         </div>
 
         <div className="entrance-image-container">
 					<div className="box top-space-10 entrance entrance-al text-center">
-						<a style={{color: 'white'}}><h1>AI Marketplace</h1></a>
+						<a onClick={() => this.setState({ShowMainPage: false, ShowDataMarket: false, ShowAIMarket: true})}style={{color: 'white'}}><h1>AI Marketplace</h1></a>
 					</div>
 				</div>
 				</div>
