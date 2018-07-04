@@ -478,6 +478,10 @@ nav.navbar {
 #section-2 {
   margin-top: 20px;
 }
+
+#section-2 > div {
+  background: white;
+}
 #section-2 .sidebar {
   max-height: 720px;
   overflow: scroll;
@@ -488,9 +492,14 @@ nav.navbar {
 }
 
 #section-2 .maincontent .box {
-  height: 440px;
+  height: 436px;
   margin-top: 0 !important;
+  background: #ffffff;
 }
+#section-2 .maincontent {
+  background: #ffffff;
+}
+
 #section-2 .maincontent .entrance-image-container {
   width: 100%;
   height: 100%;
@@ -504,7 +513,7 @@ nav.navbar {
   transition: all 0.5s ease-out;
 }
 #section-2 .maincontent .box.entrance-data {
-  background: url('./images/2.png');
+  background: url('./images/Data-Market-Place.png');
   background-size: cover;
 }
 #section-2 .maincontent .box.entrance h1 {
@@ -520,7 +529,7 @@ nav.navbar {
 
 }
 #section-2 .maincontent .box.entrance-al {
-  background: url('./images/1.png');
+  background: url('./images/AI-Market-Place.png');
   background-size: cover;
 }
 #section-2 .maincontent .box.entrance-al:hover {
@@ -737,10 +746,12 @@ nav.navbar {
 }
 
 table {
-  /* table-layout: fixed;
-  width: 50px; */
   max-width: 100% !important;
   margin: 10px 0 !important;
+}
+
+tr {
+  border-bottom: 1px solid #ddd;
 }
 
 td {
@@ -754,7 +765,7 @@ td {
 }
 
 th {
-  background: lightgrey;
+  background: rgba(250, 250, 250, 1);
 }
 
 .market-data {
@@ -762,7 +773,7 @@ th {
 }
 
 .table-striped > tbody > tr:nth-child(2n+1) > td, .table-striped > tbody > tr:nth-child(2n+1) > th {
-  background-color: #87CEFA !important;
+  background-color: #ffffff !important;
 }
 .table-striped > tbody > tr:nth-child(2n) > td, .table-striped > tbody > tr:nth-child(2n) > th {
   background-color: #ffffff;
@@ -780,23 +791,61 @@ th {
 }
 
 .upload-btn {
-  background-color: #BCD085;
+  background-color: rgba(59, 161, 255, 1);
+  color: #ffffff;
   border-radius: 8px !important;
   width: 200px;
   height: 50%;
   display: table;
-  margin: 0 auto;
+  margin: 10px auto;
+}
+
+.data-market {
+  padding: 0;
 }
 
 .market-header {
+  height: 10%;
+  border-bottom: 1px solid lightgrey;
+}
+
+.market-header-title {
   display: flex;
+  height: 80%;
+  width: 100%;
   justify-content: space-between;
+  align-items: center;
+}
+
+.bread-crumb {
+  height: 15%;
+  margin-top: 15px;
+  margin-left: 15px;
+}
+
+.market-header-title h1 {
+  margin-left: 15px;
+  margin-bottom: 15px;
+  align-self: flex-end;
+}
+
+.market-header-title button {
+  margin-right: 15px;
+  margin-bottom: 15px;
+  align-self: flex-end;
+}
+
+.table-wrapper {
+  margin: 0 10px;
+}
+
+.market-header-title:nth-child(1), .market-header-title:nth-child(2) {
+  align-self: flex-start;
 }
 
 .marketplace-label {
   font-size: 26px;
   font-family: Monospaced Number,Chinese Quote,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,PingFang SC,Hiragino Sans GB,Microsoft YaHei,Helvetica Neue,Helvetica,Arial,sans-serif;  
-  margin: 0 250px; 
   /* background-image: url('./images/label-background.png'); */
 }
 
@@ -940,3 +989,61 @@ th {
   left: 0;
   background-color:rgba(0,0,0,0.3);
 }
+
+.show-details {
+  display: flex;
+
+}
+.show-details label {
+  margin: 0 10px 0 0;
+  width: 33%;
+  text-align: right;
+}
+
+.show-details span {
+  width: 50%;
+  word-break: break-all;
+}
+
+.detail{
+  cursor: pointer;
+  padding-right: 15px;
+}
+
+.detail:hover {
+  color:'#1890FF'
+}
+
+.data-market {
+  background: #ffffff;
+  width: 76%;
+  height: 931px;
+  margin-left: 20px;
+}
+.my-data-place {
+  width: 22% !important;
+}
+
+.footer-amrita {
+  display: flex;
+  justify-content: center;
+}
+
+.footer-amrita div {
+  align-self: end;
+}
+
+.sell-data-modal label {
+  text-align: right;
+  width: 33%;
+}
+.sell-data-modal label.price {
+  padding-right: 7px !important;
+}
+.sell-data-modal input {
+  display: inline-block !important;
+  width: 67% !important;
+}
+
+
+

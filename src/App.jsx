@@ -1,6 +1,7 @@
-import { Button, Form, Modal ,Jumbotron} from 'react-bootstrap';
+import { Form, Modal} from 'react-bootstrap';
+import { Button, Checkbox, Input, Select, Upload, message, Icon, Pagination, Rate, Breadcrumb} from 'antd';
 import React, { Component } from 'react';
-
+import 'antd/dist/antd.css';
 import logo from './images/logo.png';
 import currency from './images/currency.png';
 import profile from './images/empty-profile-pic.jpg';
@@ -13,10 +14,12 @@ import web3 from './web3';
 
 import ipfs from './ipfs';
 
-import chainList from './ChainList.json'
+import chainList from './build/contracts/ChainList.json';
 const TruffleContract = require('truffle-contract');
 const aesjs = require('aes-js');
 const fs = require('browserify-fs');
+const Option = Select.Option;
+const { TextArea } = Input;
 
 
 class App extends Component {
@@ -51,13 +54,32 @@ class App extends Component {
       OpenMyData: false,
       ImageCheck: true,
       GenomicCheck: true,
+      StorageType: '',
       FileExtension:'',
       DecryptedText:'',
       MarketImageCheck: true,
       MarketGenomicCheck: true,
       ShowDataMarket: false,
       ShowMainPage: true,
+      ShowAIMarket: false,
       ShowSubCategory: false,
+
+      NameForDetail: '',
+      CategoryForDetail: '',
+      SubCategoryForDetail: '',
+      DataTypeForDetail: '',
+      PriceForDetail: '',
+      SellerForDetail: '',
+      DescriptionForDetail: '',
+      ShowDetails: false,
+
+      MyNameDetail: '',
+      MyCategoryDetail: '',
+      MySubCategoryDetail: '',
+      MyDataTypeDetail: '',
+      MyIPFSDetail: '',
+      MyDescriptionDetail: '',
+      ShowMyDetails: false,
       
       MainCategory: ["EMR", "Numerical Measurement", "Medical Imaging Data", "Genetic Data"],
       Categories: [
@@ -79,14 +101,17 @@ class App extends Component {
       },
       SelectSubCategory: '',
 
-      dataForSale: [
-        { Id: '1', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
-        { Id: '2', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
-        { Id: '3', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
-        { Id: '4', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' },
-        { Id: '5', Seller: 'Jason', Buyer: 'Alex', Name: 'Data', Description: 'Health', Price: '100 ETH' }
+      mockDataForSale: [
+        {
+          NameForDetail: 'Image Data',
+          CategoryForDetail: 'Image',
+          SubCategoryForDetail: 'CT',
+          DataTypeForDetail: 'Image data',
+          PriceForDetail: '1 AMN',
+          Seller: '0Xdfhjksahjkgjhgdahkjhkjdsasfsfdsfgsdfgsf',
+          DescriptionForDetail: 'head and neck scan',
+        },
       ],
-
       DataForSale: [],
       AllMyData: [],
       show: false
@@ -96,34 +121,49 @@ class App extends Component {
     this.contract.setProvider(web3.currentProvider);
   }
 
+  props = {
+    name: 'file',
+    action: '//jsonplaceholder.typicode.com/posts/',
+    headers: {
+      authorization: 'authorization-text',
+    },
+    onChange(info) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === 'done') {
+        message.success(`${info.file.name} file uploaded successfully`);
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    },
+  };
+  
   componentDidMount() {
 
     web3.eth.getCoinbase((err, account) => {
       //Initial Account and Get Balance
       this.setState({ account });
       web3.eth.getBalance(account, (err, balance) => {
-        this.setState({ balance: Number(web3.utils.fromWei(balance, "ether")).toFixed(2) + " ETH" });
+        this.setState({ balance: Number(web3.utils.fromWei(balance, "ether")).toFixed(2) + " AMN" });
       })
       //Instantiate Contract
       this.contract.deployed().then((contractInstance) => {
-
         this.setState({ ContractInstance: contractInstance });
-        console.log(contractInstance.getDataForSale());
 
-        //Display all market data
+        //Get all market data
         contractInstance.getDataForSale().then((dataIdList) => {
-          console.log('All Market Data ID List --', dataIdList);
 
           for (let i = 0; i < dataIdList.length; i++) {
             var dataId = dataIdList[i];
             contractInstance.dataList(dataId.toNumber()).then((data) => {
               if (data[7] === true || data[7] === null) {
-                console.log(data);
+
                 const dataForSale = [];
                 dataForSale.push({
                   Id: data[0],
                   Seller: data[1],
-                  Buyer: data[2],
+                  SubCategory: data[2],
                   Name: data[3],
                   Description: data[4],
                   Price: web3.utils.fromWei(data[5].toString(), "ether"),
@@ -134,29 +174,24 @@ class App extends Component {
                   Category: data[11]
                 })
                 this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
-                console.log('Data for sale in state --', this.state.DataForSale[0])
               }
             });
           }
         })
 
-        //Display ALL My Data
-        console.log(this.state.account);
+        //Get ALL My Data);
         contractInstance.getAllMyData(this.state.account).then((dataIdList) => {
 
           for (let i = 0; i < dataIdList.length; i++) {
             var dataId = dataIdList[i];
 
             contractInstance.dataList(dataId.toNumber()).then((data) => {
-              console.log("TYPE OF ID---", data[0])
-              console.log("TYPE OF PRICE--", data[5])
               if (data[1] === this.state.account) {
-                console.log("My data --", data);
                 const allMyData = [];
                 allMyData.push({
                   Id: data[0],
                   Seller: data[1],
-                  Buyer: data[2],
+                  SubCategory: data[2],
                   Name: data[3],
                   Description: data[4],
                   Price: web3.utils.fromWei(data[5].toString(), "ether"),
@@ -165,20 +200,18 @@ class App extends Component {
                   DataType: data[8],
                   EncryptKey: JSON.parse("[" + data[9] + "]"),
                   FileExtension: data[10],
-                  Category:data[11]
+                  Category: data[11]
                 })
-
                 this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
-                console.log('All My Data in state --', this.state.AllMyData);
               }
             });
           }
         })
-
       })
     })
   }
 
+  // Render Marketplace Data
   DataForSale = (dataforsale) => {
     let filteredData = dataforsale;
     if (this.state.MarketImageCheck === true && this.state.MarketGenomicCheck === false) {
@@ -202,25 +235,31 @@ class App extends Component {
         return (
           <tr key={index}>
             <td style={{textAlign:"center"}}>{data[0].Name}</td>
-            <td style={{textAlign:"center"}}>{data[0].Description}</td>
             <td style={{textAlign:"center"}}>{mainCategory}</td>
             <td style={{textAlign:"center"}}>{category}</td>
-            <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;ETH</td>
-            <td style={{textAlign:"center"}}>{data[0].Seller}</td>
+            <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;AMN</td>
             <td style={{textAlign:"center"}}>
-              <span className="fa fa-star checked"></span>
-              <span className="fa fa-star checked"></span>
-              <span className="fa fa-star checked"></span>
-              <span className="fa fa-star checked"></span>
-              <span className="fa fa-star checked"></span>
+            <Rate allowHalf defaultValue={4.5} />
             </td>
-            <td style={{textAlign:"center" ,width:"100px"}} className={userOwnData}><button className='btn btn-info' onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</button></td>
+            <td style={{textAlign: "center" ,width: "150px"}} className={userOwnData}>
+              <div>
+              <span onClick={() => this.openDetailModal(index)}>Details</span>
+              <Button type='primary' style={{marginLeft: '15px'}} onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</Button>
+              </div>
+            </td>
           </tr>
         )
       }) : null
     )
   }
 
+  paginationBar = () => {
+    return (
+      <Pagination showQuickJumper defaultCurrent={2} total={500} />
+    )
+  }
+  
+  // Render All My Data
   AllMyData = (allmydata, isImageData) => {
     let filteredData;
     filteredData = allmydata.filter(data => data[0].DataType.toNumber() === isImageData);
@@ -229,11 +268,10 @@ class App extends Component {
         return (
           <tr key={index}>
             <td style={{textAlign:"center"}}>{data[0].Name}</td>
-            <td style={{textAlign:"center"}}>{data[0].Description}</td>
-            <td style={{textAlign:"center"}}>{data[0].IpfsAddress}</td>
+            <td style={{textAlign:"center"}}>{this.showDecryptData(data[0].IpfsAddress, this.state.AllMyData[index][0].EncryptKey)}</td>
             <td style={{textAlign:"center"}}>
-            <div>Details</div>
-            <button className='btn btn-primary' onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</button>
+            <span onClick={() => this.openMyDataDetailsModal(index)} className='detail'>Details</span>
+            <Button type="primary" onClick={() => this.openSellModal(index)} disabled={data[0].IsForSale}>Sell</Button>
             </td>
           </tr>
         )
@@ -251,11 +289,59 @@ class App extends Component {
     })
   }
 
-   
-  decryptData = (data, key) => {
-    //console.log("PASS IN DATA---", data.toString('hex'));
+  openMyDataDetailsModal = (i) => {
+    const {
+      Name,
+      Category,
+      SubCategory,
+      DataType,
+      IpfsAddress,
+      Description
+    } = this.state.AllMyData[i][0];
+
+    let mainCategory = this.state.MainCategory[DataType.toNumber()];
+    let category = this.state.Categories[DataType.toNumber()][Category];
+    let decryptIPFS = this.showDecryptData(IpfsAddress, this.state.AllMyData[i][0].EncryptKey);
+    
+    this.setState({
+      MyNameDetail: Name,
+      MyCategoryDetail: category,
+      MySubCategoryDetail: SubCategory,
+      MyDataTypeDetail: mainCategory,
+      MyIPFSDetail: decryptIPFS,
+      MyDescriptionDetail: Description,
+      ShowMyDetails: true
+    });
+  }
+
+  openDetailModal = (i) => {
+    const {
+      Name,
+      Category,
+      SubCategory,
+      DataType,
+      Price,
+      Seller,
+      Description
+    } = this.state.DataForSale[i][0];
+
+    let mainCategory = this.state.MainCategory[DataType.toNumber()];
+    let category = this.state.Categories[DataType.toNumber()][Category];
+
+    this.setState({
+      NameForDetail: Name,
+      CategoryForDetail: category,
+      SubCategoryForDetail: SubCategory,
+      DataTypeForDetail: mainCategory,
+      PriceForDetail: Price,
+      SellerForDetail: Seller,
+      DescriptionForDetail: Description,
+      ShowDetails: true
+    })
+  }
+
+  showDecryptData = (data, key) => {
     // When ready to decrypt the hex string, convert it back to bytes
-    console.log("encryptedIPFS",data)
     let encryptedBytes = aesjs.utils.hex.toBytes(data);
 
     // The counter mode of operation maintains internal state, so to
@@ -265,17 +351,24 @@ class App extends Component {
 
     // Convert our bytes back into text
     let decryptedText = aesjs.utils.utf8.fromBytes(decryptedBytes);
-    console.log("Decrypted------", decryptedText);
-    this.setState({DecryptedText: decryptedText})
-    //this.setState({FileExtension: this.state.DataForSale[index][0].FileExtension});
-    //console.log("filename=====", `test.${this.state.FileExtension}`);
+    
+    return decryptedText;
+  }
 
-    // window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
-    // window.requestFileSystem(window.TEMPORARY, 1024*1024, this.onInitFs, err => err);
-    //fs.writeFile("test.text", '1234124', err => err ? console.log(err) : null);
-    //fs.writeFile(`.../downloads/test.${this.state.FileExtension}`, this.state.DecryptedText, err => err ? console.log(err) : null);
+  decryptData = (data, key) => {
+    // When ready to decrypt the hex string, convert it back to bytes
+    let encryptedBytes = aesjs.utils.hex.toBytes(data);
+
+    // The counter mode of operation maintains internal state, so to
+    // decrypt a new instance must be instantiated.
+    let aesCtr = new aesjs.ModeOfOperation.ctr(key, new aesjs.Counter(5));
+    let decryptedBytes = aesCtr.decrypt(encryptedBytes);
+
+    // Convert our bytes back into text
+    let decryptedText = aesjs.utils.utf8.fromBytes(decryptedBytes);
+
+    this.setState({DecryptedText: decryptedText})
     window.open(`https://ipfs.io/ipfs/${this.state.DecryptedText}`)
-    console.log("DONE!!!");
   }
 
   buyMarketData = async(index) => {
@@ -296,148 +389,18 @@ class App extends Component {
 
   sellMyData = () => {
 
-    //console.log('TYPE OF SELLING PRICE--', web3.toBigNumber(web3.utils.toWei(this.state.PriceForSell.toString(), "ether")));
-    console.log('TYPE OF SELLING ID--', this.state.IdForSale);
-    console.log(this.state.ContractInstance);
-
     this.state.ContractInstance.sellData(
       this.state.IdForSale,
       web3.utils.toWei(this.state.PriceForSell, "ether"),
       { from: this.state.account, gas: 5000000 }
-    )
-    .then(this.setState({PutItOnMarket: false, OpenMyData: false}));
-    console.log("Finished!!!!!!!!");
+    ).then(this.setState({PutItOnMarket: false, OpenMyData: false}));
   }
-
-  refreshMarket = () => {
-    //Display all market data
-    this.state.ContractInstance.getDataForSale().then((dataIdList) => {
-      console.log('All Market Data ID List --', dataIdList);
-      this.setState({DataForSale: ''});
-      for (let i = 0; i < dataIdList.length; i++) {
-        var dataId = dataIdList[i];
-        this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
-          if (data[7] === true || data[7] === null) {
-            console.log("!!!!", data);
-            const dataForSale = [];
-            dataForSale.push({
-              Id: data[0],
-              Seller: data[1],
-              Buyer: data[2],
-              Name: data[3],
-              Description: data[4],
-              Price: web3.utils.fromWei(data[5].toString(), "ether"),
-              IsForSale: data[7],
-              DataType: data[8]
-            })
-            this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
-            console.log('Data for sale in state --', this.state.DataForSale[0])
-          }
-        });
-      }
-    })
-
-    //Display ALL My Data
-    this.state.ContractInstance.getDataForSale().then((dataIdList) => {
-      this.setState({AllMyData: ''});
-      for (let i = 0; i < dataIdList.length; i++) {
-        var dataId = dataIdList[i];
-
-        this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
-
-          if (data[1] === this.state.account) {
-            console.log("My data --", data);
-            const allMyData = [];
-            allMyData.push({
-              Id: data[0],
-              Seller: data[1],
-              Buyer: data[2],
-              Name: data[3],
-              Description: data[4],
-              Price: web3.utils.fromWei(data[5].toString(), "ether"),
-              IpfsAddress: data[6],
-              IsForSale: data[7],
-              DataType: data[8]
-            })
-
-            this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
-            console.log('All My Data in state --', this.state.AllMyData);
-          }
-        });
-      }
-    })
-
-  }
-
-  errorHandling = (err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      //Display all market data
-      this.state.ContractInstance.getDataForSale().then((dataIdList) => {
-        console.log('All Market Data ID List --', dataIdList);
-
-        for (let i = 0; i < dataIdList.length; i++) {
-          var dataId = dataIdList[i];
-          this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
-            if (data[7] === true || data[7] === null) {
-              console.log("!!!!", data);
-              const dataForSale = [];
-              dataForSale.push({
-                Id: data[0],
-                Seller: data[1],
-                Buyer: data[2],
-                Name: data[3],
-                Description: data[4],
-                Price: web3.utils.fromWei(data[5].toString(), "ether"),
-                IsForSale: data[7],
-                DataType: data[8]
-              })
-              this.setState({ DataForSale: [...this.state.DataForSale, dataForSale] });
-              console.log('Data for sale in state --', this.state.DataForSale[0])
-            }
-          });
-        }
-      })
-
-      //Display ALL My Data
-      this.state.ContractInstance.getDataForSale().then((dataIdList) => {
-
-        for (let i = 0; i < dataIdList.length; i++) {
-          var dataId = dataIdList[i];
-
-          this.state.ContractInstance.dataList(dataId.toNumber()).then((data) => {
-
-            if (data[1] === this.state.account) {
-              console.log("My data --", data);
-              const allMyData = [];
-              allMyData.push({
-                Id: data[0],
-                Seller: data[1],
-                Buyer: data[2],
-                Name: data[3],
-                Description: data[4],
-                Price: web3.utils.fromWei(data[5].toString(), "ether"),
-                IpfsAddress: data[6],
-                IsForSale: data[7],
-                DataType: data[8]
-              })
-
-              this.setState({ AllMyData: [...this.state.AllMyData, allMyData] });
-              console.log('All My Data in state --', this.state.AllMyData);
-            }
-          });
-        }
-      })
-
-    }
-  }
-
+  
   captureFile = (event) => {
     event.stopPropagation()
     event.preventDefault()
     const file = event.target.files[0]
-    console.log('upload data type-------',this.state.DataType)
+
     let _validFileExtensions = [];
     if(this.state.DataType === "2") {
       _validFileExtensions = [".dcm", ".nii.gz", ".nii", ".img", ".doc"]
@@ -457,13 +420,12 @@ class App extends Component {
             }
         }
         if (!blnValid) {
-            alert("Sorry, " + sFileName + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
+            message.error("Sorry, " + sFileName + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
             event.target.value = "";
             return false;
         }
     }
     let reader = new window.FileReader()
-    console.log("reader:",reader);
     reader.readAsArrayBuffer(file)
     reader.onloadend = () => this.convertToBuffer(reader)
   };
@@ -476,8 +438,7 @@ class App extends Component {
     const buffer = await Buffer.from(reader.result);
     //set this buffer -using es6 syntax
     let key = this.randomArray(16, 100);
-    console.log("KEY---", key);
-    console.log("BUFFER---", buffer);
+
     // Convert text to bytes
     let textBytes = aesjs.utils.utf8.toBytes(buffer);
 
@@ -487,10 +448,9 @@ class App extends Component {
 
     // To print or store the binary data, you may convert it to hex
     let encryptedHex = aesjs.utils.hex.fromBytes(encryptedBytes);
-    console.log("encryptionHEX-----", encryptedHex);
+
     //file is encrypted and convert to a new buffer to prepare for uploading for IPFS
     const encryptedBuffer = await Buffer.from(encryptedHex);
-    console.log("EncryptBuffer----",encryptedBuffer);
 
     // this.setState({ buffer: encryptedBuffer, EncryptKey: key });
     this.setState({ buffer });
@@ -503,7 +463,6 @@ class App extends Component {
       DataType: 2, 
       OpenMyData: true
     });
-    //this.refreshMarket();
   };
 
   openGenomicData = () => {
@@ -511,18 +470,36 @@ class App extends Component {
       DataType: 3,
       OpenMyData: true
     });
-    //this.refreshMarket();
   };
+
+  openEMRData = () => {
+    this.setState({
+      DataType: 0,
+      OpenMyData: true
+    });
+  };
+
+  openNumericalData = () => {
+    this.setState({
+      DataType: 1,
+      OpenMyData: true
+    });
+  };
+
 
   handleMyDataClose = () => this.setState({OpenMyData: false, DataType: null});
 
   handleClose = () => this.setState({show: false, ShowSubCategory: false, DataType: ''});
 
+  handleDetailModalClose = () => this.setState({ShowDetails: false});
+
+  handleMyDetailModalClose = () => this.setState({ShowMyDetails: false});
+
   handleSellModalClose = () => this.setState({ PutItOnMarket: false });
 
   mapCategorySelection = (categories) => {
     return (
-      categories.map((category, index) => <option value={index}>{category}</option>)
+      categories.map((category, index) => <Option value={index}>{category}</Option>)
     )
   }
 
@@ -535,7 +512,6 @@ class App extends Component {
       // get Transaction Receipt in console on click
       // See: https://web3js.readthedocs.io/en/1.0/web3-eth.html#gettransactionreceipt
       await web3.eth.getTransactionReceipt(this.state.transactionHash, (err, txReceipt) => {
-        console.log(err, txReceipt);
         this.setState({ txReceipt });
       }); //await for getTransactionReceipt
 
@@ -557,20 +533,6 @@ class App extends Component {
     }
     if (e.target.id === 'data_price') {
       this.setState({ PriceForSell: e.target.value });
-    }
-    if (e.target.id === 'data_type') { 
-      this.setState({DataType: e.target.value, Category: this.state.Categories[e.target.value]});
-      if (e.target.value === '2') {
-        this.setState({ShowSubCategory: true});
-      } else {
-        this.setState({ShowSubCategory: false});
-      }
-    }
-    if (e.target.id === 'category') {
-      this.setState({SelectCategory: e.target.value});
-    }
-    if (e.target.id === 'sub_category') {
-      this.setState({SubCategory: e.target.value});
     }
     if (e.target.id === 'image-check') {
       this.setState({ImageCheck: !this.state.ImageCheck});
@@ -603,6 +565,20 @@ class App extends Component {
       this.setState({SubCategory: {...this.state.SubCategory, ExtremitiesCheck: !ExtremitiesCheck}});
     }
   }
+
+  handleStorageTypeChange = value => this.setState({StorageType: value});
+  
+  handleDataTypeChange = value => {
+    this.setState({DataType: value, Category: this.state.Categories[value]});
+    if (value === '2') {
+      this.setState({ShowSubCategory: true});
+    } else {
+      this.setState({ShowSubCategory: false});
+    }
+  }
+
+  handleCategoryChange = value => this.setState({SelectCategory: value});
+
 
   convertSubCategoryToString = () => {
     const {SubCategory} = this.state;
@@ -642,15 +618,12 @@ class App extends Component {
   onSubmit = async (event) => {
     event.preventDefault();
     this.convertSubCategoryToString();
-    console.log("SelectSubCategory:", this.state.SelectSubCategory);
 
     await ipfs.add(this.state.buffer, (err, ipfsHash) => {
-      console.log(err, ipfsHash);
-      //setState by setting ipfsHash to ipfsHash[0].hash
-      //set this buffer -using es6 syntax
+    //setState by setting ipfsHash to ipfsHash[0].hash
+    //set this buffer -using es6 syntax
     let key = this.randomArray(16, 100);
-    console.log("KEY---", key);
-    console.log("BUFFER---", ipfsHash[0].hash);
+
     // Convert text to bytes
     let textBytes = aesjs.utils.utf8.toBytes(ipfsHash[0].hash);
 
@@ -660,24 +633,19 @@ class App extends Component {
 
     // To print or store the binary data, you may convert it to hex
     let encryptedHex = aesjs.utils.hex.fromBytes(encryptedBytes);
-    console.log("encryptionHEX-----", encryptedHex);
 
       this.setState({ ipfsHash: encryptedHex, EncryptKey: key });
 
       // call Ethereum contract method "sendHash" and .send IPFS hash to etheruem contract 
       //return the transaction hash from the ethereum contract
       //see, this https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send
-      console.log('State', this.state.Name, this.state.Description);
-      console.log("DataType:",this.state.DataType, "Category:",this.state.SelectCategory.toString());
-      console.log("ipfsHash:", this.state.ipfsHash)
-      console.log("EncryptKey:", this.state.EncryptKey.toString());
-      console.log("FileExtension:", this.state.FileExtension);
 
       this.state.ContractInstance.uploadData(
         this.state.Name,
         this.state.Description,
         this.state.DataType,
         this.state.SelectCategory.toString(),
+        this.state.SelectSubCategory,
         this.state.ipfsHash,
         this.state.EncryptKey.toString(),
         this.state.FileExtension,
@@ -692,7 +660,6 @@ class App extends Component {
         DataType: null,
         FileExtension:''
       });
-
     }) //await ipfs.add 
   }; //onSubmit 
 
@@ -707,6 +674,7 @@ class App extends Component {
 
     let showMainPage = this.state.ShowMainPage ? '' : 'hide-content';
     let showDataMarket = this.state.ShowDataMarket ? '' : 'hide-content';
+    let showAIMarket = this.state.ShowAIMarket ? '' : 'hide-content';
     let ShowSubCategory = this.state.ShowSubCategory ? '' : 'hide-content';
 
     const {BrainCheck, HeadCheck, ChestCheck, HeartCheck, AbdomenCheck, ExtremitiesCheck} = this.state.SubCategory;
@@ -724,7 +692,7 @@ return (
 								<span className="icon-bar"></span>
 							</button>
             
-							<a className="navbar-brand"><img src={logo} height="50" /></a>
+							<a className="navbar-brand"onClick={() => window.location.reload()} ><img src={logo} height="50" /></a>
 						</div>
 						
 						<div className="navbar-collapse collapse">
@@ -759,7 +727,7 @@ return (
     <div className="container">
       <div className="row" id="section-2">
 
-        <div className="col-md-3">
+        <div className="col-md-3 my-data-place">
           <div className="btn text-center btn-lg upload-btn" onClick={this.handleOpen}>Upload</div>
           
           <div className="top-space-10">
@@ -776,101 +744,95 @@ return (
 		        </div>
 	        </div>
 
-          <div className="parent-image" onClick={this.openGenomicData}>
+          <div className="parent-image" onClick={this.openEMRData}>
 		        <div className="child-image bg-three">
 			         <a className="image-name">EMR</a>
 		        </div>
 	        </div>
 
-          <div className="parent-image" onClick={this.openGenomicData}>
+          <div className="parent-image" onClick={this.openNumericalData}>
 		        <div className="child-image bg-four">
 			         <a className="image-name">Numerical Measurement</a>
 		        </div>
 	        </div>
-
-              {/* <div className="onClickTextOverImage-image" onClick={this.openImageData}>
-                <div className="text">
-                   <a>Image Data</a>
-                </div>
-            </div>
-
-              <div className="onClickTextOverImage-genomic" onClick={this.openGenomicData}>
-                <div className="text">
-                   <a>Genetic Data</a>
-                </div>
-              </div> */}
-
         </div>
-        </div>
+      </div>
 
-        <div className={showDataMarket}>
-        <div className="col-md-9">
-
-          {/* <div className="box top-space-20 text-center">
-            <p className="top-space-20">Lorem ipsum dolor sit amet, consectetur adipisicing</p>
-            <p>Name</p>
-            <p>Data</p>
-            <p>1 ETH</p>
-            <button className="btn btn-lg btn-blue">Buy</button>
-          </div> */}
-          {/* <div className='panel panel-default'>
-            <div className='panel-head'>Market Data</div>
-            <div className='panel-body'>{this.DataForSale(this.state.DataForSale)}</div>
-          </div> */}
+      <div className={showAIMarket}>
+        <div className="col-md-9 data-market" style={{display: "relative"}}>
           <div className='market-header'>
-            <div className="back-button" onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false})}>
-              <span><i className="fa fa-chevron-left fa-lg" /></span>
-              <span>Back</span>
+            <div className='bread-crumb'>
+            <Breadcrumb>
+                <Breadcrumb.Item>Home</Breadcrumb.Item>
+                <Breadcrumb.Item><a href="">AI Marketplace</a></Breadcrumb.Item>
+              </Breadcrumb>
             </div>
-
-            <div>
-            <span className='marketplace-label'>Data Marketplace</span>
+            <div className='market-header-title'> 
+              <h1 className='marketplace-label'>AI Marketplace</h1>
+              <Button onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false, ShowAIMarket: false})}>Back</Button>
             </div>
-            
-            <div className='filter-check-box'>
-              <span>
-                  <label>Image:</label>
-                  <input type="checkbox" id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
-              </span>
-              <span>
-                 <label>Gene:</label>
-                 <input type="checkbox" id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
-              </span>
-            </div>
-            
           </div>
-          <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Data Type</th>
-              <th>Category</th>
-              <th>Price</th>
-              <th>Seller</th>
-              <th>Rating</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.DataForSale(this.state.DataForSale)}
-          </tbody>
-        </table>
         </div>
+      </div>
+
+      <div className={showDataMarket}>
+        <div className="col-md-9 data-market" style={{display: "relative"}}>
+          <div className='market-header'>
+            <div className='bread-crumb'>
+            <Breadcrumb>
+                <Breadcrumb.Item>Home</Breadcrumb.Item>
+                <Breadcrumb.Item><a href="">Data Marketplace</a></Breadcrumb.Item>
+              </Breadcrumb>
+          </div>
+            <div className='market-header-title'> 
+              <h1 className='marketplace-label'>Data Marketplace</h1>
+              <Button onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false, ShowAIMarket: false})}>Back</Button>
+            </div>
         </div>
+
+          <span style={{marginRight: '10px', marginTop: '15px'}}> 
+              <label style={{margin: '0 10px'}}>Image:</label>
+              <Checkbox id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
+          </span>
+          <span>
+              <label style={{margin: '0 10px'}}>Gene:</label>
+              <Checkbox id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
+          </span>
+          <div className='table-wrapper'>
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Data Type</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Rating</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.DataForSale(this.state.DataForSale)}
+              </tbody>
+            </table>
+        </div>
+        <div style={{width: "100%", margin: "0 auto", position:"absolute", left:"28%"}}>
+            {this.paginationBar()}
+        </div>
+      </div>
+    </div>
 
        <div className={showMainPage}>
         <div className="col-md-9 maincontent">
 
 				<div className="entrance-image-container">
 					<div className="box entrance entrance-data text-center">
-						<a onClick={() => this.setState({ShowMainPage: false, ShowDataMarket: true})} style={{color:'white'}}><h1>Data Marketplace</h1></a>
+						<a onClick={() => this.setState({ShowMainPage: false, ShowDataMarket: true, ShowAIMarket: false})} style={{color:'white'}}><h1>Data Marketplace</h1></a>
 					</div>
         </div>
 
         <div className="entrance-image-container">
 					<div className="box top-space-10 entrance entrance-al text-center">
-						<a style={{color: 'white'}}><h1>AI Marketplace</h1></a>
+						<a onClick={() => this.setState({ShowMainPage: false, ShowDataMarket: false, ShowAIMarket: true})}style={{color: 'white'}}><h1>AI Marketplace</h1></a>
 					</div>
 				</div>
 				</div>
@@ -879,76 +841,27 @@ return (
       </div>
     </div>
 
-    <div className="footer">
-      <div className="row">
-        <div className="col-sm-8">
-          <div className="col-sm-4">
-            <div className="text-center">
-              <h4>Amrita Network</h4>
-              <ul className="footer-menu">
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-              </ul>
-            </div>
-          </div>
-          <div className="col-sm-4">
-            <div className="text-center">
-              <h4>Amrita Network</h4>
-              <ul className="footer-menu">
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-              </ul>
-            </div>
-          </div>
-          <div className="col-sm-4">
-            <div className="text-center">
-              <h4>Amrita Network</h4>
-              <ul className="footer-menu">
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-                <li>Amrita Network</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div className="col-sm-4 right-sidebar">
-          <div className="col-sm-8 col-sm-offset-2">
-            <div className="text-center">
-              <h4>Amrita Network</h4>
-              <p>Amrita MVP</p>
-            </div>
-          </div>
-        </div>
-         
-      </div>
+    <div className="footer-amrita">
+      <div>Copyright ©2011-2018 AMRITA NETWORK ALL RIGHTS RESERVED</div>
     </div>
 
     <Modal show={this.state.OpenMyData} onHide={this.handleMyDataClose}>
       <Modal.Header closeButton>
-        <Modal.Title>{this.state.MainCategory[this.state.DataType]} Data</Modal.Title>
+        <Modal.Title>{this.state.MainCategory[this.state.DataType]}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <table className="table table-hover">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Ipfs Address</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.AllMyData(this.state.AllMyData, this.state.DataType)}
-          </tbody>
-        </table>
+            <table className="table table-hover">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Ipfs Address</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.AllMyData(this.state.AllMyData, this.state.DataType)}
+              </tbody>
+            </table>
       </Modal.Body>
     </Modal>
 
@@ -960,73 +873,61 @@ return (
             <Form onSubmit={this.onSubmit}>
               <div className='form-group'>
                 <label>Data name</label>
-                <input type="text" className='form-control' id="data_name" onChange={this.handleEventChange} placeholder="Enter the name of your article" required/>
+                <Input type="text" className='form-control' id="data_name" onChange={this.handleEventChange} placeholder="Enter the name of your article" required/>
               </div>
               <div className='form-group'>
                 <label>Description</label>
-                <textarea type="text" className='form-control vresize' id="data_description" onChange={this.handleEventChange} placeholder="Describe your article" maxLength="255" required></textarea>
+                <TextArea type="text" className='form-control vresize' id="data_description" onChange={this.handleEventChange} placeholder="Describe your article" maxLength="255" required></TextArea>
               </div>
               <div className='form-group'>
                 <label>Storage Type</label>
-                <select className="form-control" id="storage_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
-                  <option value="" disabled selected>Please Select Storage Type</option>
-                  <option value="0">IPFS</option>
-                  <option value="1">StorJ</option>
-                  <option value="2">AWS</option>
-                  <option value="3">Google Cloud</option>
-                  <option value="4">Microsoft Azure</option>
-                </select>
+                <Select className="form-control" onChange={this.handleStorageTypeChange} placeholder="Please select Upload Data Type" required>
+                  <Option value="0">IPFS</Option>
+                  <Option value="1">StorJ</Option>
+                  <Option value="2">AWS</Option>
+                  <Option value="3">Google Cloud</Option>
+                  <Option value="4">Microsoft Azure</Option>
+                </Select>
               </div>
               <div className='form-group'>
                 <label>Data Type</label>
-                <select className="form-control" id="data_type" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
-                  <option value="" disabled selected>Please Select Upload Data Type</option>
-                  <option value="0">EMR</option>
-                  <option value="1">Numerical Measurement</option>
-                  <option value="2">Medical Imaging Data</option>
-                  <option value="3">Genetic Data</option>
-                </select>
+                <Select className="form-control" onChange={this.handleDataTypeChange} placeholder="Please select Upload Data Type" required>
+                  <Option value="2">Medical Imaging Data</Option>
+                  <Option value="3">Genetic Data</Option>
+                  <Option value="0">EMR</Option>
+                  <Option value="1">Numerical Measurement</Option>
+                </Select>
               </div>
               <div className='form-group'>
                 <label>Category</label>
-                <select className="form-control" id="category" onChange={this.handleEventChange} placeholder="Please select a category" required>
-                  <option value="" disabled selected>Please Select A Category</option>
+                <Select className="form-control" onChange={this.handleCategoryChange} placeholder="Please select a category" required>
                   {this.mapCategorySelection(this.state.Category)}
-                </select>
+                </Select>
               </div>
               <div className={`form-group ${ShowSubCategory}`}>
                 <label>SubCategory</label>
-                {/* <select className="form-control" id="sub_category" onChange={this.handleEventChange} placeholder="Please select Upload Data Type" required>
-                  <option value="" disabled selected>Please Select A SubCategory</option>
-                  <option value="0">Brain</option>
-                  <option value="1">Head and Neck</option>
-                  <option value="2">Chest</option>
-                  <option value="3">Heart</option>
-                  <option value="4">Abdomen</option>
-                  <option value="5">Extremities and Joint</option>
-                </select> */}
                 <div>
-                  <input type="checkbox" id="brain-check" checked={BrainCheck} onChange={this.handleEventChange} />
+                  <Checkbox type="checkbox" id="brain-check" checked={BrainCheck} onChange={this.handleEventChange} />
                   <label className="checkbox-label-spacing">Brain</label>
                 </div>
                 <div>
-                  <input type="checkbox" id="head-check" checked={HeadCheck} onChange={this.handleEventChange} />
+                  <Checkbox type="checkbox" id="head-check" checked={HeadCheck} onChange={this.handleEventChange} />
                   <label className="checkbox-label-spacing">Head and Neck</label>
                 </div>
                 <div>
-                  <input type="checkbox" id="chest-check" checked={ChestCheck} onChange={this.handleEventChange} />
+                  <Checkbox type="checkbox" id="chest-check" checked={ChestCheck} onChange={this.handleEventChange} />
                   <label className="checkbox-label-spacing">Chest</label>
                 </div>
                 <div>
-                  <input type="checkbox" id="heart-check" checked={HeartCheck} onChange={this.handleEventChange} />
+                  <Checkbox type="checkbox" id="heart-check" checked={HeartCheck} onChange={this.handleEventChange} />
                   <label className="checkbox-label-spacing">Heart</label>
                 </div>
                 <div>
-                  <input type="checkbox" id="abdomen-check" checked={AbdomenCheck} onChange={this.handleEventChange} />
+                  <Checkbox type="checkbox" id="abdomen-check" checked={AbdomenCheck} onChange={this.handleEventChange} />
                   <label className="checkbox-label-spacing">Abdomen</label>
                 </div>
                 <div>
-                  <input type="checkbox" id="extremities-check" checked={ExtremitiesCheck} onChange={this.handleEventChange} />
+                  <Checkbox type="checkbox" id="extremities-check" checked={ExtremitiesCheck} onChange={this.handleEventChange} />
                   <label className="checkbox-label-spacing">Extremities and Joints</label>
                 </div>
               </div>
@@ -1039,8 +940,8 @@ return (
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <button className='btn btn-primary' type='submit' onClick={this.onSubmit} disabled={!isEnabled}>Submit</button>
-            <button className='btn btn-default' onClick={this.handleClose}>Close</button>
+            <Button type="primary" onClick={this.onSubmit} disabled={!isEnabled}>Submit</Button>
+            <Button type="default" style={{marginLeft:'10px'}} onClick={this.handleClose}>Close</Button>
           </Modal.Footer>
         </Modal>
 
@@ -1050,24 +951,100 @@ return (
           </Modal.Header>
           <Modal.Body>
             <Form onSubmit={this.sellMyData}>
-              <div className='form-group'>
+              <div className='form-group sell-data-modal'>
                 <label>Data name:&nbsp;&nbsp;</label>
-                <label>{this.state.NameForSale}</label>
+                <span>{this.state.NameForSale}</span>
               </div>
-              <div className='form-group'>
+              <div className='form-group sell-data-modal'>
                 <label>Description:&nbsp;&nbsp;</label>
-                <label>{this.state.DescriptionForSale}</label>
+                <span>{this.state.DescriptionForSale}</span>
               </div>
-              <div className="form-group">
-                <label>Price in ETH</label>
+              <div className="form-group sell-data-modal">
+                <label style={{paddingRight: '7px'}}>Price in AMN:</label>
                 <input type="number" className="form-control" id="data_price" onChange={this.handleEventChange} placeholder="1" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" />
               </div>
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <button className='btn btn-primary' type='submit' onClick={this.sellMyData}>Submit</button>
-            <button className='btn btn-default' onClick={this.handleSellModalClose}>Close</button>
+            <Button style={{marginRight: "10px"}} type='primary' onClick={this.sellMyData}>Submit</Button>
+            <Button onClick={this.handleSellModalClose}>Close</Button>
           </Modal.Footer>
+        </Modal>
+
+        <Modal show={this.state.ShowDetails} onHide={this.handleDetailModalClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Details</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <div className='form-group show-details'>
+                <label>Name:&nbsp;&nbsp;</label>
+                <label style={{color:'#1890FF', textAlign:'left'}}>{this.state.NameForDetail}</label>
+              </div>
+              <div className='form-group show-details'>
+                <label>Data Type:&nbsp;&nbsp;</label>
+                <span>{this.state.DataTypeForDetail}</span>
+              </div>
+              <div className='form-group show-details'>
+                <label>Category:&nbsp;&nbsp;</label>
+                <span>{this.state.CategoryForDetail}</span>
+              </div>
+              <div className='form-group show-details'>
+                <label>Sub Category:&nbsp;&nbsp;</label>
+                <span>{this.state.SubCategoryForDetail}</span>
+              </div>
+              <div className='form-group show-details'>
+                <label>Price:&nbsp;&nbsp;</label>
+                <span>{this.state.PriceForDetail}&nbsp;&nbsp;AMN</span>
+              </div>
+              <div className='form-group show-details'>
+                <label>Seller:&nbsp;&nbsp;</label>
+                <span>{this.state.SellerForDetail}</span>
+              </div>
+              <div className='form-group show-details'>
+                <label>Rating:&nbsp;&nbsp;</label>
+                <Rate allowHalf defaultValue={4.5} />
+              </div>
+              <div className='form-group show-details'>
+                <label>Description:&nbsp;&nbsp;</label>
+                <span>{this.state.DescriptionForDetail}</span>
+              </div>
+            </Form>
+          </Modal.Body>
+        </Modal>
+
+        <Modal show={this.state.ShowMyDetails} onHide={this.handleMyDetailModalClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Details</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <div className='form-group show-details'>
+                <label>Name:&nbsp;&nbsp;</label>
+                <label style={{color:'#1890FF', textAlign:'left'}}>{this.state.MyNameDetail}</label>
+              </div>
+              <div className='form-group show-details'>
+                <label>Data Type:&nbsp;&nbsp;</label>
+                <span>{this.state.MyDataTypeDetail}</span>
+              </div>
+              <div className='form-group show-details'>
+                <label>Category:&nbsp;&nbsp;</label>
+                <span>{this.state.MyCategoryDetail}</span>
+              </div>
+              <div className='form-group show-details'>
+                <label>Sub Category:&nbsp;&nbsp;</label>
+                <span>{this.state.MySubCategoryDetail}</span>
+              </div>
+              <div className='form-group show-details'>
+                <label>IPFS Address:&nbsp;&nbsp;</label>
+                <span>{this.state.MyIPFSDetail}</span>
+              </div>
+              <div className='form-group show-details'>
+                <label>Description:&nbsp;&nbsp;</label>
+                <span>{this.state.MyDescriptionDetail}</span>
+              </div>
+            </Form>
+          </Modal.Body> 
         </Modal>
     </div>
     )
