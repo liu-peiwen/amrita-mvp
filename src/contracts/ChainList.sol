@@ -40,7 +40,7 @@ contract ChainList {
     string _name,
     uint256 _price,
     string _ipfsAddress
-  ); 
+  );
 
   // store ipfsAddress with data name and description into ethereum
   function uploadData(string _name, string _description, DataType _dataType, string _category, string _subcategory, string _ipfsAddress, string _key, string _extension) public {
@@ -69,6 +69,7 @@ contract ChainList {
      _description,
      0x0,
      _ipfsAddress,
+
      false,
      _dataType,
      _key,
