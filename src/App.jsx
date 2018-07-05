@@ -112,6 +112,27 @@ class App extends Component {
           DescriptionForDetail: 'head and neck scan',
         },
       ],
+      ImageLinkDict: {
+        'avaamo': '',
+        'aviso':'',
+        'aws-ml':'',
+        'bayes':'',
+        'berg':'',
+        'clearstory-data':'',
+        'cloudminds':'',
+        'databricks':'',
+        'datarpm':'',
+        'deepgram':'',
+        'descartes-labs':'',
+        'general-vision':'',
+        'infinigraph':'',
+        'jask':'',
+        'prodo':'',
+        'signal-sense':'',
+        'solvati':'',
+        'swiftIQ':'',
+        'drbrain':'http://www.drbrain.net/index.php/User/login.html'
+      },
       DataForSale: [],
       AllMyData: [],
       show: false
@@ -119,25 +140,7 @@ class App extends Component {
 
     this.contract = TruffleContract(chainList);
     this.contract.setProvider(web3.currentProvider);
-  }
-
-  props = {
-    name: 'file',
-    action: '//jsonplaceholder.typicode.com/posts/',
-    headers: {
-      authorization: 'authorization-text',
-    },
-    onChange(info) {
-      if (info.file.status !== 'uploading') {
-        console.log(info.file, info.fileList);
-      }
-      if (info.file.status === 'done') {
-        message.success(`${info.file.name} file uploaded successfully`);
-      } else if (info.file.status === 'error') {
-        message.error(`${info.file.name} file upload failed.`);
-      }
-    },
-  };
+  } 
   
   componentDidMount() {
 
@@ -278,6 +281,18 @@ class App extends Component {
       })
     )
   }
+
+  renderAIMarketImage = (object) => {
+    const imageComponent =[];
+
+    for (const [key, value] of Object.entries(object)) {
+      const images = require.context('./images/service-provider', true);
+      const aiImage = images(`./${key}.png`);
+      
+      imageComponent.push(<img src={aiImage} onClick={() => window.location.assign(value)} className="ai-image"/>)
+    };
+    return imageComponent; 
+  } 
 
   openSellModal = (i) => {
     this.setState({
@@ -763,8 +778,8 @@ return (
           <div className='market-header'>
             <div className='bread-crumb'>
             <Breadcrumb>
-                <Breadcrumb.Item>Home</Breadcrumb.Item>
-                <Breadcrumb.Item><a href="">AI Marketplace</a></Breadcrumb.Item>
+                <Breadcrumb.Item><a href="">Home</a></Breadcrumb.Item>
+                <Breadcrumb.Item>AI Marketplace</Breadcrumb.Item>
               </Breadcrumb>
             </div>
             <div className='market-header-title'> 
@@ -772,6 +787,7 @@ return (
               <Button onClick={() => this.setState({ShowMainPage: true, ShowDataMarket: false, ShowAIMarket: false})}>Back</Button>
             </div>
           </div>
+          { this.renderAIMarketImage(this.state.ImageLinkDict)}
         </div>
       </div>
 
