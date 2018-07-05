@@ -418,7 +418,7 @@ class App extends Component {
 
     let _validFileExtensions = [];
     if(this.state.DataType === "2") {
-      _validFileExtensions = [".dcm", ".nii.gz", ".nii", ".img", ".doc"]
+      _validFileExtensions = [".dcm", ".nii.gz", ".nii", ".img", ".doc", ".png"]
     } else if(this.state.DataType === "3") {
     _validFileExtensions = [".vcf", ".sam"];
     }
