@@ -784,8 +784,8 @@ return (
                   <ReactTooltip place="bottom" type="dark" effect="solid">
                     <span>{this.state.account}</span>
                   </ReactTooltip> */}
-                  
-                  <Menu mode="horizontal">
+
+                  <Menu mode="horizontal" style={{position:"relative", bottom:"3px"}}>
                     <SubMenu title={<ul>{this.state.account}</ul>}>
                       <Item onClick={() => this.setState({
                         ShowPurchaseHistory: true, 
