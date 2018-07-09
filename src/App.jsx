@@ -1,5 +1,5 @@
 import { Form, Modal} from 'react-bootstrap';
-import { Button, Checkbox, Input, Select, Upload, message, Icon, Pagination, Rate, Breadcrumb} from 'antd';
+import { Button, Checkbox, Input, Select, Upload, message, Icon, Pagination, Rate, Breadcrumb, Menu} from 'antd';
 import React, { Component } from 'react';
 import 'antd/dist/antd.css';
 import logo from './images/logo.png';
@@ -20,6 +20,9 @@ const aesjs = require('aes-js');
 const fs = require('browserify-fs');
 const Option = Select.Option;
 const { TextArea } = Input;
+const SubMenu = Menu.SubMenu;
+const Item = Menu.Item;
+const MenuItemGroup = Menu.ItemGroup;
 
 
 class App extends Component {
@@ -63,6 +66,7 @@ class App extends Component {
       ShowMainPage: true,
       ShowAIMarket: false,
       ShowSubCategory: false,
+      ShowPurchaseHistory: false,
 
       NameForDetail: '',
       CategoryForDetail: '',
@@ -259,6 +263,49 @@ class App extends Component {
   paginationBar = () => {
     return (
       <Pagination showQuickJumper defaultCurrent={2} total={500} />
+    )
+  }
+
+  // Render My Purchase History
+  PurchaseHistory = (dataforsale) => {
+    let filteredData = dataforsale.filter(data => data[0].Seller === this.state.account);
+
+    if (this.state.MarketImageCheck === true && this.state.MarketGenomicCheck === false) {
+      filteredData = filteredData.filter(data => data[0].DataType.toNumber() === 0);
+    }
+    if (this.state.MarketImageCheck === false && this.state.MarketGenomicCheck === true) {
+      filteredData = filteredData.filter(data => data[0].DataType.toNumber() === 1);
+    }
+    if (this.state.MarketImageCheck === false && this.state.MarketGenomicCheck === false) {
+      filteredData = [];
+    }
+    if (this.state.MarketImageCheck === true && this.state.MarketGenomicCheck === true) {
+      filteredData = filteredData;
+    }
+    return (
+      filteredData ?
+      filteredData.map((data, index) => {
+        let userOwnData = data[0].Seller === this.state.account ? "can-not-buy" : "";
+        let mainCategory = this.state.MainCategory[data[0].DataType.toNumber()];
+        let category = this.state.Categories[data[0].DataType.toNumber()][data[0].Category];
+        return (
+          <tr key={index}>
+            <td style={{textAlign:"center"}}>{data[0].Name}</td>
+            <td style={{textAlign:"center"}}>{mainCategory}</td>
+            <td style={{textAlign:"center"}}>{category}</td>
+            <td style={{textAlign:"center"}}>{data[0].Price}&nbsp;AMN</td>
+            <td style={{textAlign:"center"}}>
+            <Rate allowHalf defaultValue={4.5} />
+            </td>
+            <td style={{textAlign: "center" ,width: "150px"}} className={userOwnData}>
+              <div>
+              <span onClick={() => this.openDetailModal(index)}>Details</span>
+              <Button type='primary' style={{marginLeft: '15px'}} onClick={() => this.buyMarketData(index)} disabled={data[0].Seller === this.state.account}>Buy</Button>
+              </div>
+            </td>
+          </tr>
+        )
+      }) : null
     )
   }
   
@@ -691,6 +738,7 @@ class App extends Component {
     let showDataMarket = this.state.ShowDataMarket ? '' : 'hide-content';
     let showAIMarket = this.state.ShowAIMarket ? '' : 'hide-content';
     let ShowSubCategory = this.state.ShowSubCategory ? '' : 'hide-content';
+    let ShowPurchaseHistory = this.state.ShowPurchaseHistory ? '' : 'hide-content';
 
     const {BrainCheck, HeadCheck, ChestCheck, HeartCheck, AbdomenCheck, ExtremitiesCheck} = this.state.SubCategory;
 return (
@@ -717,15 +765,35 @@ return (
 					        	</div>
 					        	<p className="padding-5 text-center border-radius-50" id="search-icon" ><i className="fa fa-search"></i></p>
 					    </form>
+              {/* <Menu>
+                <Item><img src={currency} width="30" />{this.state.balance}</Item>
+                <SubMenu title={<span>{this.state.account}</span>}>
+                  <Item>Purchase History</Item>
+                  <Item>Buy History</Item>
+                </SubMenu>
+                <Item></Item>
+              </Menu> */}
+
 					    <ul className="nav navbar-nav navbar-right">
 								<li><a href="#" className="currency"><img src={currency} width="30" /> {this.state.balance}</a></li>
 								<li className="dropdown">
-									<a href="#" className="dropdown-toggle" data-tip="React-tooltip" data-toggle="dropdown" role="button" ><img src={profile} height="30" />
-								  <p className="account-info"> {this.state.account} </p></a>
+									{/* <a href="#" className="nav-dropdown" data-tip="React-tooltip" title="Dropdown" id="basic-nav-dropdown" >
+                  <img src={profile} height="30" />
+								  <p className="account-info"> {this.state.account} </p>
+                  </a>
                   <ReactTooltip place="bottom" type="dark" effect="solid">
                     <span>{this.state.account}</span>
-                  </ReactTooltip>
-                  
+                  </ReactTooltip> */}
+                  <Menu>
+                    <SubMenu title={<span>{this.state.account}</span>}>
+                      <Item onClick={() => this.setState({
+                        ShowPurchaseHistory: true, 
+                        ShowMainPage: false,
+                        ShowDataMarket: false,
+                        ShowAIMarket: false})}>Purchase History</Item>
+                      <Item>Buy History</Item>
+                   </SubMenu>
+                  </Menu>
 								</li>
 								<li><a href="#" id="messege"><i className="fa fa-comments"></i></a></li>
 							</ul>
@@ -796,8 +864,8 @@ return (
           <div className='market-header'>
             <div className='bread-crumb'>
             <Breadcrumb>
-                <Breadcrumb.Item>Home</Breadcrumb.Item>
-                <Breadcrumb.Item><a href="">Data Marketplace</a></Breadcrumb.Item>
+                <Breadcrumb.Item><a href="">Home</a></Breadcrumb.Item>
+                <Breadcrumb.Item>Data Marketplace</Breadcrumb.Item>
               </Breadcrumb>
           </div>
             <div className='market-header-title'> 
@@ -828,6 +896,59 @@ return (
               </thead>
               <tbody>
                 {this.DataForSale(this.state.DataForSale)}
+              </tbody>
+            </table>
+        </div>
+        <div style={{width: "100%", margin: "0 auto", position:"absolute", left:"28%"}}>
+            {this.paginationBar()}
+        </div>
+      </div>
+    </div>
+
+    <div className={ShowPurchaseHistory}>
+        <div className="col-md-9 data-market" style={{display: "relative"}}>
+          <div className='market-header'>
+            <div className='bread-crumb'>
+            <Breadcrumb>
+                <Breadcrumb.Item><a href="">Home</a></Breadcrumb.Item>
+                <Breadcrumb.Item>Purchase History</Breadcrumb.Item>
+              </Breadcrumb>
+          </div>
+            <div className='market-header-title'> 
+              <h1 className='marketplace-label'>Purchase History</h1>
+              <Button onClick={() => 
+                this.setState({
+                  ShowMainPage: true,
+                  ShowDataMarket: false,
+                  ShowAIMarket: false,
+                  ShowPurchaseHistory: false,
+                  MarketImageCheck: true,
+                  MarketGenomicCheck: true})}>Back</Button>
+            </div>
+        </div>
+
+          <span style={{marginRight: '10px', marginTop: '15px'}}> 
+              <label style={{margin: '0 10px'}}>Image:</label>
+              <Checkbox id="market-image-check" checked={this.state.MarketImageCheck} onChange={this.handleEventChange} />
+          </span>
+          <span>
+              <label style={{margin: '0 10px'}}>Gene:</label>
+              <Checkbox id="market-genomic-check" checked={this.state.MarketGenomicCheck} onChange={this.handleEventChange} />
+          </span>
+          <div className='table-wrapper'>
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Data Type</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Rating</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.PurchaseHistory(this.state.DataForSale)}
               </tbody>
             </table>
         </div>

@@ -37,6 +37,7 @@
     "font-awesome": "^4.7.0",
     "fs": "0.0.1-security",
     "fs-js": "^1.0.6",
+    "react-router-dom": "^4.3.1",
     "react-tooltip": "^3.6.1",
     "truffle-contract": "^3.0.5"
   }
