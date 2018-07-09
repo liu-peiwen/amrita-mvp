@@ -776,7 +776,7 @@ return (
 
 					    <ul className="nav navbar-nav navbar-right">
 								<li><a href="#" className="currency"><img src={currency} width="30" /> {this.state.balance}</a></li>
-								<li className="dropdown">
+							  <li>
 									{/* <a href="#" className="nav-dropdown" data-tip="React-tooltip" title="Dropdown" id="basic-nav-dropdown" >
                   <img src={profile} height="30" />
 								  <p className="account-info"> {this.state.account} </p>
@@ -784,8 +784,9 @@ return (
                   <ReactTooltip place="bottom" type="dark" effect="solid">
                     <span>{this.state.account}</span>
                   </ReactTooltip> */}
-                  <Menu>
-                    <SubMenu title={<span>{this.state.account}</span>}>
+                  
+                  <Menu mode="horizontal">
+                    <SubMenu title={<ul>{this.state.account}</ul>}>
                       <Item onClick={() => this.setState({
                         ShowPurchaseHistory: true, 
                         ShowMainPage: false,
