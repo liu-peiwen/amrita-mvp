@@ -508,14 +508,7 @@ nav.navbar {
   cursor: pointer;
   margin-bottom: 30px;
 }
-#section-2 .maincontent .box.entrance-data:hover {
-  transform: scale(1.2);
-  transition: all 0.5s ease-out;
-}
-#section-2 .maincontent .box.entrance-data {
-  background: url('./images/Data-Market-Place.png');
-  background-size: cover;
-}
+
 #section-2 .maincontent .box.entrance h1 {
   height: 100%;
   color: white;
@@ -526,7 +519,14 @@ nav.navbar {
 #section-2 .maincontent .box.entrance h1:hover {
   cursor: pointer;
   background: rgba(0,0,0,0.5);
-
+}
+#section-2 .maincontent .box.entrance-data {
+  background: url('./images/Data-Market-Place.png');
+  background-size: cover;
+}
+#section-2 .maincontent .box.entrance-data:hover {
+  transform: scale(1.2);
+  transition: all 0.5s ease-out;
 }
 #section-2 .maincontent .box.entrance-al {
   background: url('./images/AI-Market-Place.png');
@@ -1045,5 +1045,10 @@ th {
   width: 67% !important;
 }
 
-
-
+.ai-image {
+  width: 20%; 
+  height: 20%;
+}
+.ai-image:hover {
+  cursor: pointer;
+}
